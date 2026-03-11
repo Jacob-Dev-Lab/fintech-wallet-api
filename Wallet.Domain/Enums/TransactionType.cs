@@ -4,6 +4,7 @@
     {
         Deposit = 1,
         Withdrawal = 2,
-        Transfer = 3
+        TransferTo = 3,
+        TransferFrom = 4
     }
 }

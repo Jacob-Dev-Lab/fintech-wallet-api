@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Wallet.Application.Common;
 using Wallet.Application.Interfaces;
 using Wallet.Domain.Entities;
 using Wallet.Infrastructure.Data;
@@ -18,19 +20,29 @@ namespace Wallet.Infrastructure.Repository
             _dbContext = dbContext;
         }
 
-        public async Task Add(Transaction transaction)
+        public async Task AddAsync(Transaction transaction)
         {
-            if (transaction is null) 
-                throw new ArgumentNullException(nameof(transaction), "Ivalid transaction");
+            ArgumentNullException.ThrowIfNull(transaction);
 
             await _dbContext.Transactions.AddAsync(transaction);
             await _dbContext.SaveChangesAsync();
 
         }
 
-        public async Task<Transaction?> GetByWalletId(Guid walletId)
+        public async Task<Transaction?> GetByIdAsync(Guid Id)
         {
-            return await _dbContext.Transactions.FindAsync(walletId);
+            if (Id == Guid.Empty)
+                return null;
+
+            return await _dbContext.Transactions.FindAsync(Id);
+        }
+
+        public async Task<IReadOnlyList<Transaction>?> GetByWalletIdAsync(Guid walletId)
+        {
+            if (walletId == Guid.Empty)
+                return null;
+
+            return await _dbContext.Transactions.Where(w => w.WalletId == walletId).ToListAsync();
         }
     }
 }

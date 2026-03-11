@@ -14,30 +14,46 @@ namespace Wallet.Infrastructure.Repository
             _dbContext = context;
         }
 
-        public async Task Add(WalletAccount wallet)
+        public async Task AddAsync(WalletAccount wallet)
         {
-            if (wallet is null)
-                throw new ArgumentNullException(nameof(wallet), "Invalid entry, try again.");
+            ArgumentNullException.ThrowIfNull(wallet);
 
             await _dbContext.Wallets.AddAsync(wallet);
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<WalletAccount?> GetById(Guid walletId)
+        public async Task<WalletAccount?> GetByIdAsync(Guid walletId)
         {
-            if (walletId.Equals(Guid.Empty))
-                throw new ArgumentException("Invalid entry, try again.", nameof(walletId));
+            if (walletId == Guid.Empty)
+                return null;
 
-            return await _dbContext.Wallets.FirstOrDefaultAsync(w => w.WalletId.Equals(walletId));
+            return await _dbContext.Wallets.FirstOrDefaultAsync(w => w.WalletId == walletId);
         }
 
-        public async Task Update(WalletAccount wallet)
+        public async Task<IReadOnlyList<WalletAccount>> GetAllAsync()
         {
-            if (wallet is null)
-                throw new ArgumentNullException(nameof(wallet), "Invalid entry, try again.");
+            return await _dbContext.Wallets.AsNoTracking().ToListAsync();
+        }
+
+        public async Task UpdateAsync(WalletAccount wallet)
+        {
+            ArgumentNullException.ThrowIfNull(wallet);
 
             _dbContext.Wallets.Update(wallet);
             await _dbContext.SaveChangesAsync();
         }
+
+        //public async Task DeleteAsync(Guid walletId)
+        //{
+        //    if (walletId == Guid.Empty)
+        //        throw new ArgumentNullException(nameof(walletId));
+
+        //    var wallet = await _dbContext.Wallets.FindAsync(walletId);
+
+        //    ArgumentNullException.ThrowIfNull(wallet);
+
+        //    _dbContext.Wallets.Remove(wallet);
+        //    await _dbContext.SaveChangesAsync();
+        //}
     }
 }

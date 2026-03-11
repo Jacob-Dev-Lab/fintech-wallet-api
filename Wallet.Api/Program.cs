@@ -13,11 +13,8 @@ builder.Services.AddDbContext<WalletApiDbContext>(options
     => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<IWalletService, WalletService>();
-//builder.Services.AddScoped<ICreateWalletRequestHandler, CreateWalletRequestHandler>();
-
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-//builder.Services.AddOpenApi();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(); // This will now resolve
