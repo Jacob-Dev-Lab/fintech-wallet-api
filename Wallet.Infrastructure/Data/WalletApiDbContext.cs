@@ -19,6 +19,10 @@ namespace Wallet.Infrastructure.Data
             builder.Entity<Transaction>()
                 .Property(t => t.Amount)
                 .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<Transaction>()
+                .Property(t => t.Balance)
+                .HasColumnType("decimal(18, 2)");
         }
     }
 }
