@@ -6,10 +6,8 @@ namespace Wallet.Application.Interfaces
     public interface IWalletRepository
     {
         Task AddAsync(WalletAccount wallet);
-        Task<WalletAccount?> GetByIdAsync(Guid id);
-        Task<IReadOnlyList<WalletAccount>> GetAllAsync();
+        Task<WalletAccount?> GetByWalletIdAsync(Guid walletId);
+        IQueryable<WalletAccount> GetByUserId(long userId);
         Task UpdateAsync(WalletAccount wallet);
-        //Task DeleteAsync(Guid id);
-        //Task<bool> WalletExistForUserAsync(Guid userId);
     }
 }

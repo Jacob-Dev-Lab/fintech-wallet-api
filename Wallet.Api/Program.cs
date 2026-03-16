@@ -14,7 +14,11 @@ builder.Services.AddDbContext<WalletApiDbContext>(options
 
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IGlobalDbOperation, GlobalDbOperation>();
 builder.Services.AddScoped<IWalletService, WalletService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(); // This will now resolve

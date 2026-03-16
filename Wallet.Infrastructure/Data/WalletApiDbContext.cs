@@ -5,6 +5,7 @@ namespace Wallet.Infrastructure.Data
 {
     public class WalletApiDbContext : DbContext
     {
+        public DbSet<User> Users { get; private set; }
         public DbSet<WalletAccount> Wallets { get; private set; }
         public DbSet<Transaction> Transactions { get; private set; }
 

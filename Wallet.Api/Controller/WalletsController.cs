@@ -17,9 +17,9 @@ namespace Wallet.Api.Controller
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(long userId)
         {
-            var result = await _service.GetAllAsync();
+            var result = await _service.GetByUserIdAsync(userId);
 
             if (!result.IsSuccess)
                 return BadRequest(result.Message);
@@ -28,9 +28,9 @@ namespace Wallet.Api.Controller
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        public async Task<IActionResult> GetById(Guid walletId)
         {
-            var result = await _service.GetByIdAsync(id);
+            var result = await _service.GetByWalletIdAsync(walletId);
 
             if (!result.IsSuccess)
                 return BadRequest(result.Message);
@@ -39,9 +39,9 @@ namespace Wallet.Api.Controller
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create([FromBody] WalletCreationRequest request)
         {
-            var result = await _service.CreateAsync();
+            var result = await _service.CreateAsync(request.UserId, request.Currency);
 
             if (!result.IsSuccess || result.Value is null)
                 return BadRequest(result.Message);
@@ -52,9 +52,9 @@ namespace Wallet.Api.Controller
         }
 
         [HttpPost("{id}/deposit")]
-        public async Task<IActionResult> Deposit(Guid id, [FromBody] DepositRequest request)
+        public async Task<IActionResult> Deposit(Guid walletId, [FromBody] DepositRequest request)
         {
-            var result = await _service.DepositAsync(id, request);
+            var result = await _service.DepositAsync(walletId, request);
 
             if (!result.IsSuccess || result.Value is null)
                 return NotFound(result.Message);

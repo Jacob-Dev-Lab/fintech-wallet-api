@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Wallet.Application.Common;
+﻿using Microsoft.EntityFrameworkCore;
 using Wallet.Application.Interfaces;
 using Wallet.Domain.Entities;
 using Wallet.Infrastructure.Data;
@@ -25,24 +19,26 @@ namespace Wallet.Infrastructure.Repository
             ArgumentNullException.ThrowIfNull(transaction);
 
             await _dbContext.Transactions.AddAsync(transaction);
-            await _dbContext.SaveChangesAsync();
-
         }
 
-        public async Task<Transaction?> GetByIdAsync(Guid Id)
+        public async Task<Transaction?> GetByIdAsync(Guid transactionId)
         {
-            if (Id == Guid.Empty)
-                return null;
-
-            return await _dbContext.Transactions.FindAsync(Id);
+            return await _dbContext.Transactions
+                .FirstOrDefaultAsync(t => t.TransactionId == transactionId);
         }
 
-        public async Task<IReadOnlyList<Transaction>?> GetByWalletIdAsync(Guid walletId)
+        public IQueryable<Transaction> GetByWalletIdAsync(Guid walletId)
         {
-            if (walletId == Guid.Empty)
-                return null;
+            return _dbContext.Transactions
+                .AsNoTracking()
+                .Where(t => t.WalletId == walletId);
+        }
 
-            return await _dbContext.Transactions.Where(w => w.WalletId == walletId).ToListAsync();
+        public IQueryable<Transaction> GetByUserIdAsync(long userId)
+        {
+            return _dbContext.Transactions
+                .AsNoTracking()
+                .Where(t => t.UserId == userId);
         }
     }
 }

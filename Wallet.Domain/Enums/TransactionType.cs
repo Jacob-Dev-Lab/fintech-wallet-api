@@ -2,9 +2,9 @@
 {
     public enum TransactionType
     {
-        Deposit = 1,
-        Withdrawal = 2,
-        TransferTo = 3,
-        TransferFrom = 4
+        Deposit,
+        Withdrawal,
+        TransferIn,
+        TransferOut
     }
 }

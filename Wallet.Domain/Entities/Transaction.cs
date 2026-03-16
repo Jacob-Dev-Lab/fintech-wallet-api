@@ -8,6 +8,7 @@ namespace Wallet.Domain.Entities
         public long Id { get; private set; }
         public Guid TransactionId { get; private set; }
         public Guid WalletId { get; private set; }
+        public long UserId { get; private set; }
         public TransactionType Type { get; private set; }
         public decimal Amount { get; private set; }
         public decimal Balance { get; private set; }
@@ -17,19 +18,21 @@ namespace Wallet.Domain.Entities
 
         public Transaction() { }
 
-        public Transaction(Guid walletId, TransactionType type, decimal amount, 
-            decimal balance, string? description, Guid? referenceWalletId = null)
+        public Transaction(long userId, Guid walletId, TransactionType type, decimal amount,
+            decimal balance, string? description = "-", Guid? referenceWalletId = null)
         {
             if (amount <= 0)
                 throw new DomainException("Amount must be greater than zero.");
 
-            if (!TransactionType.IsDefined(type))
+            if (!Enum.IsDefined<TransactionType>(type))
                 throw new DomainException("Invalid transaction type.");
 
-            if (type == TransactionType.TransferTo && referenceWalletId == null)
-                throw new DomainException("Recipient wallet ID must be provided for transfer transactions.");
+            if ((type == TransactionType.TransferIn || type == TransactionType.TransferOut)
+                && referenceWalletId == null)
+                throw new DomainException("Transfer requires a reference wallet.");
 
             TransactionId = Guid.NewGuid();
+            UserId = userId;
             WalletId = walletId;
             Type = type;
             Amount = amount;

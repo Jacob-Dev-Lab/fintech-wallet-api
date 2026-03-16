@@ -19,41 +19,27 @@ namespace Wallet.Infrastructure.Repository
             ArgumentNullException.ThrowIfNull(wallet);
 
             await _dbContext.Wallets.AddAsync(wallet);
-            await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<WalletAccount?> GetByIdAsync(Guid walletId)
+        public async Task<WalletAccount?> GetByWalletIdAsync(Guid walletId)
         {
-            if (walletId == Guid.Empty)
-                return null;
-
-            return await _dbContext.Wallets.FirstOrDefaultAsync(w => w.WalletId == walletId);
+            return await _dbContext.Wallets
+                .FirstOrDefaultAsync(w => w.WalletId == walletId);
         }
 
-        public async Task<IReadOnlyList<WalletAccount>> GetAllAsync()
+        public IQueryable<WalletAccount> GetByUserId(long userId)
         {
-            return await _dbContext.Wallets.AsNoTracking().ToListAsync();
+            return _dbContext.Wallets
+                .AsNoTracking()
+                .Where(w => w.UserId == userId);
         }
 
-        public async Task UpdateAsync(WalletAccount wallet)
+        public Task UpdateAsync(WalletAccount wallet)
         {
             ArgumentNullException.ThrowIfNull(wallet);
 
-            _dbContext.Wallets.Update(wallet);
-            await _dbContext.SaveChangesAsync();
+            _dbContext.Wallets.Attach(wallet);
+            return Task.CompletedTask;
         }
-
-        //public async Task DeleteAsync(Guid walletId)
-        //{
-        //    if (walletId == Guid.Empty)
-        //        throw new ArgumentNullException(nameof(walletId));
-
-        //    var wallet = await _dbContext.Wallets.FindAsync(walletId);
-
-        //    ArgumentNullException.ThrowIfNull(wallet);
-
-        //    _dbContext.Wallets.Remove(wallet);
-        //    await _dbContext.SaveChangesAsync();
-        //}
     }
 }
