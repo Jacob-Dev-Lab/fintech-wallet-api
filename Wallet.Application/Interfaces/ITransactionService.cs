@@ -1,11 +1,11 @@
 ﻿using Wallet.Application.Common;
-using Wallet.Application.Dtos;
+using Wallet.Application.Dtos.Responses;
 
 namespace Wallet.Application.Interfaces
 {
     public interface ITransactionService
     {
-        Task<Result<IReadOnlyList<TransactionResponse>>> GetByWalletIdAsync(Guid walletId);
-        Task<Result<IReadOnlyList<TransactionResponse>>> GetByUserIdAsync(long userISd);
+        Task<Result<IReadOnlyList<TransactionDto>>> GetByWalletIdAsync(Guid walletId);
+        Task<Result<IReadOnlyList<TransactionDto>>> GetByUserIdAsync(long userISd);
     }
 }

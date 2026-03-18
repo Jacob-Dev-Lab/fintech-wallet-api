@@ -1,6 +1,6 @@
-﻿namespace Wallet.Application.Dtos
+﻿namespace Wallet.Application.Dtos.Responses
 {
-    public class UserResponse
+    public class UserDto
     {
         public long Id { get; set; }
         public string Name { get; set; }

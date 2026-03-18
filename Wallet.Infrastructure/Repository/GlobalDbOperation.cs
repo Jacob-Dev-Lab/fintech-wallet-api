@@ -16,5 +16,21 @@ namespace Wallet.Infrastructure.Repository
         {
             await _dbContext.SaveChangesAsync();
         }
+
+        public async Task ExecuteTransactionAsync(Func<Task> operation)
+        {
+            await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+            try
+            {
+                await operation();
+                await SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
     }
 }

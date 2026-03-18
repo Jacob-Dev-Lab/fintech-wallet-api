@@ -1,11 +1,13 @@
 ﻿using Wallet.Application.Common;
-using Wallet.Application.Dtos;
+using Wallet.Application.Dtos.Requests;
+using Wallet.Application.Dtos.Responses;
 
 namespace Wallet.Application.Interfaces
 {
     public interface IUserService
     {
-        Task<Result<UserResponse>> CreateAsync(CreateUserRequest requst);
-        Task<Result<IReadOnlyList<UserResponse>>> GetUsersAsync();
+        Task<Result<UserDto>> AddAsync(CreateUserRequest requst);
+        Task<Result<UserDto>> GetByIdAsync(long Id);
+        Task<Result<IReadOnlyList<UserDto>>> GetAllAsync();
     }
 }

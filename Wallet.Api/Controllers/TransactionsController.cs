@@ -1,18 +1,19 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Wallet.Application.Common;
 using Wallet.Application.Interfaces;
 
-namespace Wallet.Api.Controller
+namespace Wallet.Api.Controllers
 {
-    [Controller]
+    [ApiController]
     [Route("api/[controller]")]
     public class TransactionsController : ControllerBase
     {
         private readonly ITransactionService _transactionService;
+        private readonly StatusResponse _response;
 
-        public TransactionsController(ITransactionService transactionService)
+        public TransactionsController(ITransactionService transactionService, StatusResponse response)
         {
             _transactionService = transactionService;
+            _response = response;
         }
 
         [HttpGet]
@@ -21,7 +22,7 @@ namespace Wallet.Api.Controller
             var result = await _transactionService.GetByUserIdAsync(userId);
 
             if (!result.IsSuccess)
-                return BadRequest(result.Message);
+                return _response.Action(result.Error!); ;
 
             return Ok(result.Value);
         }
@@ -32,7 +33,7 @@ namespace Wallet.Api.Controller
             var result = await _transactionService.GetByWalletIdAsync(walletId);
 
             if (!result.IsSuccess)
-                return BadRequest(result.Message);
+                return _response.Action(result.Error!);
 
             return Ok(result.Value);
         }

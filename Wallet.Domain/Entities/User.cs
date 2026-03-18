@@ -4,7 +4,7 @@ namespace Wallet.Domain.Entities
 {
     public class User
     {
-        public int Id { get; private set; }
+        public int Id { get; private set; } // to be corrected
         public string Name { get; private set; } = string.Empty;
         public string Email { get; private set; } = string.Empty;
         public string Username { get; private set; } = string.Empty;
@@ -25,7 +25,7 @@ namespace Wallet.Domain.Entities
             if (string.IsNullOrEmpty(username))
                 throw new DomainException("Require a valid username");
 
-            if (string.IsNullOrEmpty(username))
+            if (string.IsNullOrEmpty(password))
                 throw new DomainException("Require a valid password");
 
             Name = name;
@@ -38,6 +38,9 @@ namespace Wallet.Domain.Entities
 
         public void Deactivate()
         {
+            if (!Active)
+                throw new DomainException("User already deactivated");
+
             Active = false;
             DeactivatedAt = DateTime.UtcNow; 
         }

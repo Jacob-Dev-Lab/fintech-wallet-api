@@ -3,24 +3,24 @@
     public class Result
     {
         public bool IsSuccess { get; }
-        public string? Message { get; }
+        public Error? Error { get; }
 
-        public Result(bool isSuccess, string? message)
+        protected Result(bool isSuccess, Error? error)
         {
             IsSuccess = isSuccess;
-            Message = message;
+            Error = error;
         }
 
         public static Result Success() => new (true, null);
-        public static Result Failure(string message) => new (false, message);
+        public static Result Failure(Error error) => new (false, error);
     }
 
     public class Result<T> : Result
     {
         public T? Value { get; }
         private Result(T value) : base(true, null) => Value = value;
-        private Result(string message) : base(false, message) { }
+        private Result(Error error) : base(false, error) { }
         public static Result<T> Success(T value) => new (value);
-        public static new Result<T> Failure(string message) => new (message);
+        public static new Result<T> Failure(Error error) => new (error);
     }
 }

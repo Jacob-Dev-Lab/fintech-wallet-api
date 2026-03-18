@@ -5,7 +5,7 @@ namespace Wallet.Application.Interfaces
     public interface IUserRepository
     {
         Task AddAsync(User user);
-        Task UpdateAsync(User user);
+        Task<User?> GetByIdAsync(int Id);
         IQueryable<User> GetAll();
     }
 }

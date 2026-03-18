@@ -1,19 +1,20 @@
-﻿using System.Reflection.Metadata.Ecma335;
-using Microsoft.AspNetCore.Mvc;
-using Wallet.Application.Dtos;
+﻿using Microsoft.AspNetCore.Mvc;
+using Wallet.Application.Dtos.Requests;
 using Wallet.Application.Interfaces;
 
-namespace Wallet.Api.Controller
+namespace Wallet.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
     public class WalletsController : ControllerBase
     {
         private readonly IWalletService _service;
+        private readonly StatusResponse _response;
 
-        public WalletsController(IWalletService service)
+        public WalletsController(IWalletService service, StatusResponse response)
         {
             _service = service;
+            _response = response;
         }
 
         [HttpGet]
@@ -22,7 +23,7 @@ namespace Wallet.Api.Controller
             var result = await _service.GetByUserIdAsync(userId);
 
             if (!result.IsSuccess)
-                return BadRequest(result.Message);
+                return _response.Action(result.Error!);
 
             return Ok(result.Value);
         }
@@ -33,18 +34,21 @@ namespace Wallet.Api.Controller
             var result = await _service.GetByWalletIdAsync(walletId);
 
             if (!result.IsSuccess)
-                return BadRequest(result.Message);
+                return _response.Action(result.Error!);
 
             return Ok(result.Value);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] WalletCreationRequest request)
+        public async Task<IActionResult> Create([FromBody] CreateWalletRequest request)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var result = await _service.CreateAsync(request.UserId, request.Currency);
 
             if (!result.IsSuccess || result.Value is null)
-                return BadRequest(result.Message);
+                return _response.Action(result.Error!);
 
             var wallet = result.Value;
 
@@ -57,7 +61,7 @@ namespace Wallet.Api.Controller
             var result = await _service.DepositAsync(walletId, request);
 
             if (!result.IsSuccess || result.Value is null)
-                return NotFound(result.Message);
+                return _response.Action(result.Error!);
 
             return Ok(result.Value);
         }
@@ -68,7 +72,7 @@ namespace Wallet.Api.Controller
             var result = await _service.WithdrawAsync(id, request);
 
             if (!result.IsSuccess || result.Value is null)
-                return NotFound(result.Message);
+                return _response.Action(result.Error!);
 
             return Ok(result.Value);
         }
@@ -79,7 +83,7 @@ namespace Wallet.Api.Controller
             var result = await _service.TransferAsync(id, request);
 
             if (!result.IsSuccess)
-                return BadRequest(result.Message);
+                return _response.Action(result.Error!);
 
             return Ok(result.Value);
         }

@@ -1,5 +1,4 @@
-﻿using Wallet.Application.Common;
-using Wallet.Domain.Entities;
+﻿using Wallet.Domain.Entities;
 
 namespace Wallet.Application.Interfaces
 {
@@ -8,6 +7,6 @@ namespace Wallet.Application.Interfaces
         Task AddAsync(Transaction transaction);
         Task<Transaction?> GetByIdAsync(Guid transactionId);
         IQueryable<Transaction> GetByWalletIdAsync(Guid walletId);
-        IQueryable<Transaction> GetByUserIdAsync(long userId);
+        IQueryable<Transaction> GetByUserId(long userId);
     }
 }

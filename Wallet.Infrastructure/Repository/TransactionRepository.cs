@@ -34,7 +34,7 @@ namespace Wallet.Infrastructure.Repository
                 .Where(t => t.WalletId == walletId);
         }
 
-        public IQueryable<Transaction> GetByUserIdAsync(long userId)
+        public IQueryable<Transaction> GetByUserId(long userId)
         {
             return _dbContext.Transactions
                 .AsNoTracking()

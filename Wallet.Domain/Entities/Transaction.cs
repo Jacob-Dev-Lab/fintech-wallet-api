@@ -19,12 +19,12 @@ namespace Wallet.Domain.Entities
         public Transaction() { }
 
         public Transaction(long userId, Guid walletId, TransactionType type, decimal amount,
-            decimal balance, string? description = "-", Guid? referenceWalletId = null)
+            decimal balance, string? description = null, Guid? referenceWalletId = null)
         {
             if (amount <= 0)
                 throw new DomainException("Amount must be greater than zero.");
 
-            if (!Enum.IsDefined<TransactionType>(type))
+            if (!Enum.IsDefined(typeof(TransactionType), type))
                 throw new DomainException("Invalid transaction type.");
 
             if ((type == TransactionType.TransferIn || type == TransactionType.TransferOut)
@@ -40,6 +40,78 @@ namespace Wallet.Domain.Entities
             ReferenceWalletId = referenceWalletId;
             Description = description;
             CreatedAt = DateTime.UtcNow;
+        }
+
+        public static Transaction CreateTransferOut(
+            long userId,
+            Guid walletId,
+            decimal amount,
+            decimal balance,
+            Guid? referenceWalletId,
+            string? description)
+        {
+            return new Transaction(
+                userId,
+                walletId,
+                TransactionType.TransferOut,
+                amount,
+                balance,
+                description,
+                referenceWalletId
+                );
+        }
+
+        public static Transaction CreateTransferIn(
+            long userId,
+            Guid walletId,
+            decimal amount,
+            decimal balance,
+            Guid? referenceWalletId,
+            string? description)
+        {
+            return new Transaction(
+                userId,
+                walletId,
+                TransactionType.TransferIn,
+                amount,
+                balance,
+                description,
+                referenceWalletId
+                );
+        }
+
+        public static Transaction CreateDeposit(
+            long userId,
+            Guid walletId,
+            decimal amount,
+            decimal balance,
+            string? description)
+        {
+            return new Transaction(
+                userId,
+                walletId,
+                TransactionType.Deposit,
+                amount,
+                balance,
+                description
+                );
+        }
+
+        public static Transaction CreateWithdrawal(
+            long userId,
+            Guid walletId,
+            decimal amount,
+            decimal balance,
+            string? description)
+        {
+            return new Transaction(
+                userId,
+                walletId,
+                TransactionType.Withdrawal,
+                amount,
+                balance,
+                description
+                );
         }
     }
 }

@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Wallet.Application.Dtos
+namespace Wallet.Application.Dtos.Responses
 {
-    public class TransactionResponse
+    public class TransactionDto
     {
         public DateTime DateCreated { get; set; }
         public string? Transaction { get; set; }

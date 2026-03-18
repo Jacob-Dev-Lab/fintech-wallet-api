@@ -1,11 +1,11 @@
 ﻿using Wallet.Domain.Enums;
 
-namespace Wallet.Application.Dtos
+namespace Wallet.Application.Dtos.Responses
 {
-    public class WalletResponse
+    public class WalletDto
     {
         public Guid WalletId { get; set; }
-        public Currency Currency { get; set; }
+        public string? Currency { get; set; }
         public decimal Balance { get; set; }
     }
 }

@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Data;
 using Microsoft.EntityFrameworkCore;
 using Wallet.Application.Common;
-using Wallet.Application.Dtos;
+using Wallet.Application.Dtos.Requests;
+using Wallet.Application.Dtos.Responses;
 using Wallet.Application.Interfaces;
 using Wallet.Domain.Entities;
+using Wallet.Domain.Exceptions;
 
 namespace Wallet.Application.UseCases
 {
@@ -22,9 +20,11 @@ namespace Wallet.Application.UseCases
             _dbOperation = operation;
         }
 
-        public async Task<Result<UserResponse>> CreateAsync(CreateUserRequest request)
+        public async Task<Result<UserDto>> AddAsync(CreateUserRequest request)
         {
-            var user = new User
+            try
+            {
+                var user = new User
                 (
                     request.Name,
                     request.Email,
@@ -32,25 +32,60 @@ namespace Wallet.Application.UseCases
                     request.Password
                 );
 
-            if (user is null)
-                return Result<UserResponse>.Failure("Reaqure valid user");
+                await _userRepository.AddAsync(user);
+                await _dbOperation.SaveChangesAsync();
 
-            await _userRepository.UpdateAsync(user);
-            await _dbOperation.SaveChangesAsync();
-
-            return Result<UserResponse>
-                .Success(new UserResponse 
-                { 
-                    Id = user.Id, 
-                    Name = user.Name, 
-                    Email = user.Email
-                });
+                return Result<UserDto>
+                    .Success(new UserDto
+                    {
+                        Id = user.Id,
+                        Name = user.Name,
+                        Email = user.Email
+                    });
+            }
+            catch (DomainException ex)
+            {
+                return Result<UserDto>.Failure(new Error(ErrorType.BadRequest, ex.Message));
+            }
+            catch
+            {
+                throw;
+            }
         }
 
-        public async Task<Result<IReadOnlyList<UserResponse>>> GetUsersAsync()
+        public async Task<Result<UserDto>> GetByIdAsync(long Id)
         {
-            var users = await _userRepository.GetAll()
-                .Select(u => new UserResponse 
+            var id = Int32.Parse(Id.ToString()); // to be corrected
+            try
+            {
+                var user = await _userRepository.GetByIdAsync(id);
+
+                if (user is null)
+                    return Result<UserDto>.Failure(new Error(ErrorType.NotFound, "Wallet not found."));
+
+                return Result<UserDto>.Success(new UserDto
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    Email = user.Email
+                });
+            }
+            catch (DomainException ex)
+            {
+                return Result<UserDto>.Failure(new Error(ErrorType.BadRequest, ex.Message));
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<Result<IReadOnlyList<UserDto>>> GetAllAsync()
+        {
+            try
+            {
+                var users = await _userRepository.GetAll()
+                .Select(u => new UserDto
                 {
                     Id = u.Id,
                     Name = u.Name,
@@ -58,7 +93,16 @@ namespace Wallet.Application.UseCases
                 })
                 .ToListAsync();
 
-            return Result<IReadOnlyList<UserResponse>>.Success(users);
+                return Result<IReadOnlyList<UserDto>>.Success(users);
+            }
+            catch (DomainException ex)
+            {
+                return Result<IReadOnlyList<UserDto>>.Failure(new Error(ErrorType.BadRequest, ex.Message));
+            }
+            catch
+            {
+                throw;
+            }
         }
     }
 }

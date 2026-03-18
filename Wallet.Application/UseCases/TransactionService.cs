@@ -1,6 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Data;
+using Microsoft.EntityFrameworkCore;
 using Wallet.Application.Common;
-using Wallet.Application.Dtos;
+using Wallet.Application.Dtos.Responses;
 using Wallet.Application.Interfaces;
 using Wallet.Domain.Exceptions;
 
@@ -15,13 +16,12 @@ namespace Wallet.Application.UseCases
             _transactionRepository = transactionRepository;
         }
 
-        public async Task<Result<IReadOnlyList<TransactionResponse>>> GetByUserIdAsync(long userId)
+        public async Task<Result<IReadOnlyList<TransactionDto>>> GetByUserIdAsync(long userId)
         {
             try
             {
-                var transactions = await _transactionRepository.GetByUserIdAsync(userId)
-                    .Where(t => t.UserId == userId)
-                    .Select(t => new TransactionResponse
+                var transactions = await _transactionRepository.GetByUserId(userId)
+                    .Select(t => new TransactionDto
                     {
                         DateCreated = t.CreatedAt,
                         Transaction = t.Type.ToString(),
@@ -31,11 +31,11 @@ namespace Wallet.Application.UseCases
                     })
                     .ToListAsync();
 
-                return Result<IReadOnlyList<TransactionResponse>>.Success(transactions);
+                return Result<IReadOnlyList<TransactionDto>>.Success(transactions);
             }
             catch (DomainException ex)
             {
-                return Result<IReadOnlyList<TransactionResponse>>.Failure(ex.Message);
+                return Result<IReadOnlyList<TransactionDto>>.Failure(new Error(ErrorType.BadRequest, ex.Message));
             }
             catch
             {
@@ -43,13 +43,12 @@ namespace Wallet.Application.UseCases
             }
         }
 
-        public async Task<Result<IReadOnlyList<TransactionResponse>>> GetByWalletIdAsync(Guid walletId)
+        public async Task<Result<IReadOnlyList<TransactionDto>>> GetByWalletIdAsync(Guid walletId)
         {
             try
             {
                 var transactions = await _transactionRepository.GetByWalletIdAsync(walletId)
-                    .Where(t => t.WalletId == walletId)
-                    .Select(t => new TransactionResponse
+                    .Select(t => new TransactionDto
                     {
                         DateCreated = t.CreatedAt,
                         Transaction = t.Type.ToString(),
@@ -59,11 +58,11 @@ namespace Wallet.Application.UseCases
                     })
                     .ToListAsync();
 
-                return Result<IReadOnlyList<TransactionResponse>>.Success(transactions);
+                return Result<IReadOnlyList<TransactionDto>>.Success(transactions);
             }
             catch (DomainException ex)
             {
-                return Result<IReadOnlyList<TransactionResponse>>.Failure(ex.Message);
+                return Result<IReadOnlyList<TransactionDto>>.Failure(new Error(ErrorType.BadRequest, ex.Message));
             }
             catch
             {

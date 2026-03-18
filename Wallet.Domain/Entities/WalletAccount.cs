@@ -18,7 +18,7 @@ namespace Wallet.Domain.Entities
 
         public WalletAccount(long userId, Currency currency)
         {
-            if (!Currency.IsDefined(currency))
+            if (!Enum.IsDefined(typeof(Currency), currency))
                 throw new DomainException("Require a valid currency type");
 
             UserId = userId;
@@ -30,34 +30,18 @@ namespace Wallet.Domain.Entities
             CreatedAt = DateTime.UtcNow;
         }
 
-        public void Deposit(decimal amount)
+        public void Freeze()
         {
-            EnssureWalletIsNotDeleted();
-            EnsureWalletIsActive();
-            EnsureAmountIsPositive(amount);
+            if (!IsActive)
+                throw new DomainException("Wallet already frozen");
 
-            ChangeBalance(amount);
-        }
-        public void Withdraw(decimal amount)
-        {
-            EnssureWalletIsNotDeleted();
-            EnsureWalletIsActive();
-            EnsureAmountIsPositive(amount);
-
-            if (Balance < amount)
-            {
-                throw new DomainException("Insufficient balance.");
-            }
-            
-            ChangeBalance(-amount);
-        }
-
-        public void Freez()
-        {
             IsActive = false;
         }
         public void Delete()
         {
+            if (IsDeleted)
+                throw new DomainException("Wallet already deleted");
+
             IsActive = false;
             IsDeleted = true;
         }
@@ -72,22 +56,67 @@ namespace Wallet.Domain.Entities
             Balance = newBalance;
         }
 
-        private void EnsureAmountIsPositive(decimal amount)
+        private void CheckIfAmountIsGreaterThanZero(decimal amount)
         {
             if (amount <= 0)
                 throw new DomainException("Amount must be positive.");
         }
 
-        private void EnsureWalletIsActive()
+        private void CheckIfWalletIsActive()
         {
             if (!IsActive)
                 throw new DomainException("Wallet is frozen.");
         }
 
-        private void EnssureWalletIsNotDeleted()
+        private void CheckIfWalletIsDeleted()
         {
             if (IsDeleted)
                 throw new DomainException("Wallet does not exist");
+        }
+
+        public void Deposit(decimal amount)
+        {
+            CheckIfWalletIsDeleted();
+            CheckIfWalletIsActive();
+            CheckIfAmountIsGreaterThanZero(amount);
+
+            ChangeBalance(amount);
+        }
+        public void Withdraw(decimal amount)
+        {
+            CheckIfWalletIsDeleted();
+            CheckIfWalletIsActive();
+            CheckIfAmountIsGreaterThanZero(amount);
+
+            if (Balance < amount)
+            {
+                throw new DomainException("Insufficient balance.");
+            }
+
+            ChangeBalance(-amount);
+        }
+
+        public void TransferTo (WalletAccount target, decimal amount)
+        {
+            if (target == null)
+                throw new DomainException("Invalid target wallet.");
+
+            if (Currency != target.Currency)
+                throw new DomainException("Currency mismatch.");
+
+            if (WalletId == target.WalletId)
+                throw new DomainException("Cannot transfer to the same wallet.");
+
+            CheckIfWalletIsDeleted();
+            target.CheckIfWalletIsDeleted();
+
+            CheckIfWalletIsActive();
+            target.CheckIfWalletIsActive();
+
+            CheckIfAmountIsGreaterThanZero(amount);
+
+            ChangeBalance(-amount);
+            target.ChangeBalance(amount);
         }
     }
 }

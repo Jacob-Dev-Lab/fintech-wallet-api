@@ -33,13 +33,5 @@ namespace Wallet.Infrastructure.Repository
                 .AsNoTracking()
                 .Where(w => w.UserId == userId);
         }
-
-        public Task UpdateAsync(WalletAccount wallet)
-        {
-            ArgumentNullException.ThrowIfNull(wallet);
-
-            _dbContext.Wallets.Attach(wallet);
-            return Task.CompletedTask;
-        }
     }
 }

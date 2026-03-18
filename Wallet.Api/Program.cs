@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Wallet.Api;
 using Wallet.Application.Interfaces;
 using Wallet.Application.UseCases;
 using Wallet.Infrastructure.Data;
@@ -19,6 +20,7 @@ builder.Services.AddScoped<IGlobalDbOperation, GlobalDbOperation>();
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddTransient<StatusResponse>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(); // This will now resolve

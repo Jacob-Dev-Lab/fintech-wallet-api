@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Wallet.Application.Dtos
+namespace Wallet.Application.Dtos.Requests
 {
     public class CreateUserRequest
     {
