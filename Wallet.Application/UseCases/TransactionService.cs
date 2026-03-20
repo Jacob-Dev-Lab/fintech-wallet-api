@@ -20,7 +20,7 @@ namespace Wallet.Application.UseCases
         {
             try
             {
-                var transactions = await _transactionRepository.GetByUserId(userId)
+                var transactions = await _transactionRepository.FindByUserId(userId)
                     .Select(t => new TransactionDto
                     {
                         DateCreated = t.CreatedAt,
@@ -35,19 +35,21 @@ namespace Wallet.Application.UseCases
             }
             catch (DomainException ex)
             {
-                return Result<IReadOnlyList<TransactionDto>>.Failure(new Error(ErrorType.BadRequest, ex.Message));
-            }
-            catch
-            {
-                throw;
+                return Result<IReadOnlyList<TransactionDto>>
+                    .Failure(new Error(ErrorType.BadRequest, ex.Message));
             }
         }
 
-        public async Task<Result<IReadOnlyList<TransactionDto>>> GetByWalletIdAsync(Guid walletId)
+        public async Task<Result<IReadOnlyList<TransactionDto>>> GetByWalletIdAsync(long userId, Guid walletId)
         {
+            if (walletId == Guid.Empty)
+                return Result<IReadOnlyList<TransactionDto>>
+                    .Failure(new Error(ErrorType.BadRequest, "Invalid wallet id."));
+
             try
             {
-                var transactions = await _transactionRepository.GetByWalletIdAsync(walletId)
+                var transactions = await _transactionRepository.FindByUserId(userId)
+                    .Where(t =>  t.WalletId == walletId)
                     .Select(t => new TransactionDto
                     {
                         DateCreated = t.CreatedAt,
@@ -62,11 +64,8 @@ namespace Wallet.Application.UseCases
             }
             catch (DomainException ex)
             {
-                return Result<IReadOnlyList<TransactionDto>>.Failure(new Error(ErrorType.BadRequest, ex.Message));
-            }
-            catch
-            {
-                throw;
+                return Result<IReadOnlyList<TransactionDto>>
+                    .Failure(new Error(ErrorType.BadRequest, ex.Message));
             }
         }
     }

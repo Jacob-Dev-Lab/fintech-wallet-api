@@ -4,17 +4,16 @@ namespace Wallet.Domain.Entities
 {
     public class User
     {
-        public int Id { get; private set; } // to be corrected
+        public long Id { get; private set; }
         public string Name { get; private set; } = string.Empty;
         public string Email { get; private set; } = string.Empty;
-        public string Username { get; private set; } = string.Empty;
-        public string Password { get; private set; } = string.Empty;
+        public string PasswordHash { get; private set; } = string.Empty;
         public bool Active { get; private set; }
         public DateTime? DeactivatedAt { get; private set; }
 
         public User() { }
 
-        public User(string name, string email, string username, string password)
+        public User(string name, string email, string passwordHash)
         {
             if (string.IsNullOrEmpty(name))
                 throw new DomainException("Require a valid name");
@@ -22,16 +21,12 @@ namespace Wallet.Domain.Entities
             if (string.IsNullOrEmpty(email)) 
                 throw new DomainException("Require a vilid email");
 
-            if (string.IsNullOrEmpty(username))
-                throw new DomainException("Require a valid username");
-
-            if (string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(passwordHash))
                 throw new DomainException("Require a valid password");
 
             Name = name;
             Email = email;
-            Username = username;
-            Password = password;
+            PasswordHash = passwordHash;
             Active = true;
             DeactivatedAt = null;
         }

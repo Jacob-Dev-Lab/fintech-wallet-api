@@ -14,29 +14,31 @@ namespace Wallet.Infrastructure.Repository
             _dbContext = context;
         }
 
-        public async Task AddAsync(User user)
+        public void Add(User user)
         {
             ArgumentNullException.ThrowIfNull(user);
 
-            await _dbContext.Users.AddAsync(user);
+            _dbContext.Users.Add(user);
         }
 
-        //public Task UpdateAsync(User user)
-        //{
-        //    ArgumentNullException.ThrowIfNull(user);
-
-        //    _dbContext.Users.Update(user);
-        //    return Task.CompletedTask;
-        //}
-
-        public async Task<User?> GetByIdAsync(int Id)
+        public async Task<User?> FindByIdAsync(long Id)
         {
             return await _dbContext.Users.FindAsync(Id);
         }
 
-        public IQueryable<User> GetAll()
+        public IQueryable<User> FindAll()
         {
             return _dbContext.Users.AsNoTracking();
+        }
+
+        public async Task<User?> FindByEmailAsync(string email)
+        {
+            return await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+        public void Update(User user)
+        {
+            _dbContext.Users.Update(user);
         }
     }
 }

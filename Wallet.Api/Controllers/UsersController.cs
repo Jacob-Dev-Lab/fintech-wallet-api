@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Wallet.Application.Dtos.Requests;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Wallet.Application.Interfaces;
 
 namespace Wallet.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
@@ -29,28 +31,19 @@ namespace Wallet.Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetUserAsync(long Id)
+        public async Task<IActionResult> GetUserAsync()
         {
-            var result = await _userService.GetByIdAsync(Id);
+            var userClaim = User.FindFirstValue(ClaimTypes.Name);
+
+            if (!long.TryParse(userClaim, out long userId))
+                return Unauthorized(userId);
+
+            var result = await _userService.GetByIdAsync(userId);
 
             if (!result.IsSuccess)
                 return _response.Action(result.Error!);
 
             return Ok(result.Value);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> CreateAsync([FromBody] CreateUserRequest request)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var result = await _userService.AddAsync(request);
-
-            if (!result.IsSuccess)
-                return _response.Action(result.Error!);
-
-            return Created(nameof(result), result.Value);
         }
     }
 }

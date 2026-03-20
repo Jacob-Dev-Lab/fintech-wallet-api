@@ -12,28 +12,49 @@ namespace Wallet.Application.UseCases
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
-        private readonly IGlobalDbOperation _dbOperation;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IPasswordHasher _hasher;
+        private readonly IEmailValidator _emailValidator;
 
-        public UserService(IUserRepository userRepository, IGlobalDbOperation operation)
+        public UserService(IUserRepository userRepository, IUnitOfWork unitOfWork, 
+            IPasswordHasher passwordHasher, IEmailValidator emailValidator)
         {
             _userRepository = userRepository;
-            _dbOperation = operation;
+            _unitOfWork = unitOfWork;
+            _hasher = passwordHasher;
+            _emailValidator = emailValidator;
         }
 
-        public async Task<Result<UserDto>> AddAsync(CreateUserRequest request)
+        public async Task<Result<UserDto>> CreateAsync(CreateUserRequest request)
         {
+            if (string.IsNullOrWhiteSpace(request.Name) || string.IsNullOrWhiteSpace(request.Email) 
+                || string.IsNullOrWhiteSpace(request.Password))
+            {
+                return Result<UserDto>
+                    .Failure(new Error(ErrorType.BadRequest, "All fields are required"));
+            }
+
+            if (!_emailValidator.IsValid(request.Email))
+                return Result<UserDto>
+                       .Failure(new Error(ErrorType.BadRequest, "Invalid email address."));
+
             try
             {
+                if (await _userRepository.FindByEmailAsync(request.Email) != null)
+                    return Result<UserDto>
+                           .Failure(new Error(ErrorType.BadRequest, "Email address already exist."));
+
+                var passwordHash = _hasher.Hash(request.Password);
+
                 var user = new User
                 (
                     request.Name,
                     request.Email,
-                    request.Username,
-                    request.Password
+                    passwordHash
                 );
 
-                await _userRepository.AddAsync(user);
-                await _dbOperation.SaveChangesAsync();
+                _userRepository.Add(user);
+                await _unitOfWork.SaveChangesAsync();
 
                 return Result<UserDto>
                     .Success(new UserDto
@@ -47,18 +68,13 @@ namespace Wallet.Application.UseCases
             {
                 return Result<UserDto>.Failure(new Error(ErrorType.BadRequest, ex.Message));
             }
-            catch
-            {
-                throw;
-            }
         }
 
         public async Task<Result<UserDto>> GetByIdAsync(long Id)
         {
-            var id = Int32.Parse(Id.ToString()); // to be corrected
             try
             {
-                var user = await _userRepository.GetByIdAsync(id);
+                var user = await _userRepository.FindByIdAsync(Id);
 
                 if (user is null)
                     return Result<UserDto>.Failure(new Error(ErrorType.NotFound, "Wallet not found."));
@@ -74,17 +90,13 @@ namespace Wallet.Application.UseCases
             {
                 return Result<UserDto>.Failure(new Error(ErrorType.BadRequest, ex.Message));
             }
-            catch
-            {
-                throw;
-            }
         }
 
         public async Task<Result<IReadOnlyList<UserDto>>> GetAllAsync()
         {
             try
             {
-                var users = await _userRepository.GetAll()
+                var users = await _userRepository.FindAll()
                 .Select(u => new UserDto
                 {
                     Id = u.Id,
@@ -99,9 +111,33 @@ namespace Wallet.Application.UseCases
             {
                 return Result<IReadOnlyList<UserDto>>.Failure(new Error(ErrorType.BadRequest, ex.Message));
             }
-            catch
+        }
+
+        public async Task<Result<UserLoginDto>> LoginAsync(UserLoginRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+                return Result<UserLoginDto>
+                    .Failure(new Error(ErrorType.BadRequest, "Usrname/Password required"));
+            
+            try
             {
-                throw;
+                var user = await _userRepository.FindByEmailAsync(request.Email);
+
+                if (user is null)
+                    return Result<UserLoginDto>
+                        .Failure(new Error(ErrorType.BadRequest, "Incorrect Username/Password."));
+
+                if (!_hasher.Verify(user.PasswordHash, request.Password))
+                    return Result<UserLoginDto>
+                        .Failure(new Error(ErrorType.BadRequest, "Incorrect Username/Password."));
+
+                return Result<UserLoginDto>
+                        .Success(new UserLoginDto { UserId = user.Id, Email = user.Email});
+            }
+            catch (DomainException ex)
+            {
+                return Result<UserLoginDto>
+                        .Failure(new Error(ErrorType.BadRequest, ex.Message));
             }
         }
     }

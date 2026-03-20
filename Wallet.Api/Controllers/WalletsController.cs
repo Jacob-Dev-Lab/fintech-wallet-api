@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Wallet.Application.Dtos.Requests;
 using Wallet.Application.Interfaces;
 
 namespace Wallet.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class WalletsController : ControllerBase
@@ -18,8 +21,13 @@ namespace Wallet.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll(long userId)
+        public async Task<IActionResult> GetAll()
         {
+            var userClaim = User.FindFirstValue(ClaimTypes.Name);
+
+            if (!long.TryParse(userClaim, out long userId))
+                return Unauthorized(userId);
+
             var result = await _service.GetByUserIdAsync(userId);
 
             if (!result.IsSuccess)
@@ -28,10 +36,15 @@ namespace Wallet.Api.Controllers
             return Ok(result.Value);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{walletId}")]
         public async Task<IActionResult> GetById(Guid walletId)
         {
-            var result = await _service.GetByWalletIdAsync(walletId);
+            var userClaim = User.FindFirstValue(ClaimTypes.Name);
+
+            if (!long.TryParse(userClaim, out long userId))
+                return Unauthorized(userId);
+
+            var result = await _service.GetByWalletIdAsync(userId, walletId);
 
             if (!result.IsSuccess)
                 return _response.Action(result.Error!);
@@ -45,7 +58,15 @@ namespace Wallet.Api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _service.CreateAsync(request.UserId, request.Currency);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var userClaim = User.FindFirstValue(ClaimTypes.Name);
+
+            if (!long.TryParse(userClaim, out long userId))
+                return Unauthorized(userId);
+
+            var result = await _service.CreateAsync(userId, request.Currency);
 
             if (!result.IsSuccess || result.Value is null)
                 return _response.Action(result.Error!);
@@ -55,10 +76,18 @@ namespace Wallet.Api.Controllers
             return Created($"api/wallets/{wallet.WalletId}", wallet);
         }
 
-        [HttpPost("{id}/deposit")]
+        [HttpPost("{walletId}/deposit")]
         public async Task<IActionResult> Deposit(Guid walletId, [FromBody] DepositRequest request)
         {
-            var result = await _service.DepositAsync(walletId, request);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var userClaim = User.FindFirstValue(ClaimTypes.Name);
+
+            if (!long.TryParse(userClaim, out long userId))
+                return Unauthorized(userId);
+
+            var result = await _service.DepositAsync(userId, walletId, request);
 
             if (!result.IsSuccess || result.Value is null)
                 return _response.Action(result.Error!);
@@ -66,10 +95,18 @@ namespace Wallet.Api.Controllers
             return Ok(result.Value);
         }
 
-        [HttpPost("{id}/withdraw")]
-        public async Task<IActionResult> Withdraw(Guid id, [FromBody] WithdrawalRequest request)
+        [HttpPost("{walletId}/withdraw")]
+        public async Task<IActionResult> Withdraw(Guid walletId, [FromBody] WithdrawalRequest request)
         {
-            var result = await _service.WithdrawAsync(id, request);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var userClaim = User.FindFirstValue(ClaimTypes.Name);
+
+            if (!long.TryParse(userClaim, out long userId))
+                return Unauthorized(userId);
+
+            var result = await _service.WithdrawAsync(userId, walletId, request);
 
             if (!result.IsSuccess || result.Value is null)
                 return _response.Action(result.Error!);
@@ -77,10 +114,18 @@ namespace Wallet.Api.Controllers
             return Ok(result.Value);
         }
 
-        [HttpPost("{id}/transfer")]
-        public async Task<IActionResult> Transfer(Guid id, [FromBody] TransferRequest request)
+        [HttpPost("{walletId}/transfer")]
+        public async Task<IActionResult> Transfer(Guid walletId, [FromBody] TransferRequest request)
         {
-            var result = await _service.TransferAsync(id, request);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var userClaim = User.FindFirstValue(ClaimTypes.Name);
+
+            if (!long.TryParse(userClaim, out long userId))
+                return Unauthorized(userId);
+
+            var result = await _service.TransferAsync(userId, walletId, request);
 
             if (!result.IsSuccess)
                 return _response.Action(result.Error!);

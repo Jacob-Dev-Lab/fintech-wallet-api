@@ -4,8 +4,10 @@ namespace Wallet.Application.Interfaces
 {
     public interface IUserRepository
     {
-        Task AddAsync(User user);
-        Task<User?> GetByIdAsync(int Id);
-        IQueryable<User> GetAll();
+        void Add(User user);
+        Task<User?> FindByIdAsync(long Id);
+        IQueryable<User> FindAll();
+        Task<User?> FindByEmailAsync(string Email);
+        void Update(User user);
     }
 }

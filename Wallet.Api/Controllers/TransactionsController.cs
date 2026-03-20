@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Wallet.Application.Interfaces;
 
 namespace Wallet.Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class TransactionsController : ControllerBase
@@ -17,8 +20,13 @@ namespace Wallet.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetByUserId(long userId)
+        public async Task<IActionResult> GetByUserId()
         {
+            var userClaim = User.FindFirstValue(ClaimTypes.Name);
+
+            if (!long.TryParse(userClaim, out long userId))
+                return Unauthorized(userId);
+
             var result = await _transactionService.GetByUserIdAsync(userId);
 
             if (!result.IsSuccess)
@@ -30,7 +38,12 @@ namespace Wallet.Api.Controllers
         [HttpGet("{walletId}")]
         public async Task<IActionResult> GetByWalletId(Guid walletId)
         {
-            var result = await _transactionService.GetByWalletIdAsync(walletId);
+            var userClaim = User.FindFirstValue(ClaimTypes.Name);
+
+            if (!long.TryParse(userClaim, out long userId))
+                return Unauthorized(userId);
+
+            var result = await _transactionService.GetByWalletIdAsync(userId, walletId);
 
             if (!result.IsSuccess)
                 return _response.Action(result.Error!);

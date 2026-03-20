@@ -14,27 +14,20 @@ namespace Wallet.Infrastructure.Repository
             _dbContext = dbContext;
         }
 
-        public async Task AddAsync(Transaction transaction)
+        public void Add(Transaction transaction)
         {
             ArgumentNullException.ThrowIfNull(transaction);
 
-            await _dbContext.Transactions.AddAsync(transaction);
+            _dbContext.Transactions.AddAsync(transaction);
         }
 
-        public async Task<Transaction?> GetByIdAsync(Guid transactionId)
+        public async Task<Transaction?> FindByIdAsync(Guid transactionId)
         {
             return await _dbContext.Transactions
                 .FirstOrDefaultAsync(t => t.TransactionId == transactionId);
         }
 
-        public IQueryable<Transaction> GetByWalletIdAsync(Guid walletId)
-        {
-            return _dbContext.Transactions
-                .AsNoTracking()
-                .Where(t => t.WalletId == walletId);
-        }
-
-        public IQueryable<Transaction> GetByUserId(long userId)
+        public IQueryable<Transaction> FindByUserId(long userId)
         {
             return _dbContext.Transactions
                 .AsNoTracking()

@@ -4,9 +4,10 @@ namespace Wallet.Application.Interfaces
 {
     public interface ITransactionRepository
     {
-        Task AddAsync(Transaction transaction);
-        Task<Transaction?> GetByIdAsync(Guid transactionId);
-        IQueryable<Transaction> GetByWalletIdAsync(Guid walletId);
-        IQueryable<Transaction> GetByUserId(long userId);
+        void Add(Transaction transaction);
+        Task<Transaction?> FindByIdAsync(Guid transactionId);
+        IQueryable<Transaction> FindByUserId(long userId);
     }
 }
+
+

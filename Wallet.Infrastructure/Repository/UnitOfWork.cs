@@ -3,11 +3,11 @@ using Wallet.Infrastructure.Data;
 
 namespace Wallet.Infrastructure.Repository
 {
-    public class GlobalDbOperation : IGlobalDbOperation
+    public class UnitOfWork : IUnitOfWork
     {
         private readonly WalletApiDbContext _dbContext;
 
-        public GlobalDbOperation(WalletApiDbContext context)
+        public UnitOfWork(WalletApiDbContext context)
         {
             _dbContext = context;
         }
@@ -23,6 +23,7 @@ namespace Wallet.Infrastructure.Repository
             try
             {
                 await operation();
+
                 await SaveChangesAsync();
                 await transaction.CommitAsync();
             }

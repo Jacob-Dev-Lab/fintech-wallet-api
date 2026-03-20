@@ -1,6 +1,6 @@
 ﻿namespace Wallet.Application.Interfaces
 {
-    public interface IGlobalDbOperation
+    public interface IUnitOfWork
     {
         Task SaveChangesAsync();
         Task ExecuteTransactionAsync(Func<Task> operation);

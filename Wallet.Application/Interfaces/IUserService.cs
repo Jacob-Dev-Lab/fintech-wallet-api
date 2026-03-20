@@ -6,8 +6,9 @@ namespace Wallet.Application.Interfaces
 {
     public interface IUserService
     {
-        Task<Result<UserDto>> AddAsync(CreateUserRequest requst);
+        Task<Result<UserDto>> CreateAsync(CreateUserRequest requst);
         Task<Result<UserDto>> GetByIdAsync(long Id);
         Task<Result<IReadOnlyList<UserDto>>> GetAllAsync();
+        Task<Result<UserLoginDto>> LoginAsync(UserLoginRequest request);
     }
 }
