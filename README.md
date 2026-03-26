@@ -1,4 +1,4 @@
-# 💳 Wallet API
+# 💳 Wallet API (Fintech Backend)
 
 ![.NET](https://img.shields.io/badge/.NET-ASP.NET%20Core-blue)
 ![Architecture](https://img.shields.io/badge/Architecture-Clean%20Architecture-green)
@@ -6,7 +6,7 @@
 ![Database](https://img.shields.io/badge/Database-SQL%20Server-lightgrey)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-A **fintech-style digital wallet** backend built with **ASP.NET Core Web API**, designed to simulate how modern digital wallet platforms handle financial transactions, wallet management, and transaction tracking.
+A **production-style fintech wallet backend** built with **ASP.NET Core Web API**, designed to simulate how modern financial platforms securely manage wallets, transactions, and user authentication.
 
 The project demonstrates backend engineering practices including:
 - Clean Architecture
@@ -20,162 +20,180 @@ This project was built to demonstrate backend engineering skills and architectur
 
 ---
 
-## 📑 Table of Contents
+## 🚀 Overview
 
-- [Overview](#overview)
-- [Architecture](#architecture)
-- [Architecture Diagram](#architecture-diagram)
-- [Tech Stack](#tech-stack)
-- [Engineering Concepts Demonstrated](#engineering-concepts-demonstrated)
-- [Features](#features)
-- [API Endpoints](#api-endpoints)
-- [Example Requests](#example-requests)
-- [Running the Project](#running-the-project)
-- [What I Learned](#what-i-learned)
-- [Future Improvements](#future-improvements)
-- [Why I Built This Project](#why-i-built-this-project)
-- [Author](#author)
-- [License](#license)
+This project models a secure digital wallet system where users can:
 
----
+- Register and authenticate
+- Create and manage wallets
+- Deposit, withdraw and transfer funds
+- View transaction history
+- Maintain consistent financial state
 
-## Overview
+The system emphasizes:
 
-The Wallet API simulates a digital wallet platform similar to fintech applications used for sending and receiving money.
-
-Users can:
-- Create wallets
-- Add funds (via bank deposit, debit card etc.)
-- Send funds (to other wallets, bank account, paypal etc.)
-- Track transaction history
-- View wallet balances
-- Convert from one currency to another
-
-The system focuses on correct financial state management and transactional integrity, ensuring wallet balances and transaction histories remain consistent.
+- Security (JWT authentication, password hashing)
+- Clean Architecture & separation of concerns
+- Domain-driven design (DDD)
+- Transactional integrity
+- Concurrency safety
 
 ---
 
-## Architecture
+## 🏗️ Architecture
 
-This project follows Clean Architecture, separating the system into independent layers.
-Each layer has a clearly defined responsibility and communicates through interfaces and abstractions.
+This project follows Clean Architecture, ensuring maintainability and scalability.
 
-### Project Structure
+### 📂 Project Structure
 ```
 Wallet Solution
 │
-├── Wallet.API
-│   └── Controllers
-│
-├── Wallet.Application
-│   ├── DTOs
-│   ├── Interfaces
-│   └── Services
-│
-├── Wallet.Domain
-│   ├── Entities
-│   ├── Enums
-│   └── Exceptions
-│
-└── Wallet.Infrastructure
-    ├── Data
-    ├── Migrations
-    └── Repositories
-Layer Responsibilities
+├── Wallet.API            → Controllers, Middleware, Config
+├── Wallet.Application    → Use cases, DTOs, Interfaces, Business Logics
+├── Wallet.Domain         → Entities, Enums, Business Rules
+└── Wallet.Infrastructure → EF Core, Repositories, Persistence
 ```
-Domain: 
-> Contains core business entities and domain rules.`
-> This layer is independent from frameworks and infrastructure.
 
-Application: 
-> Implements use cases and coordinates domain logic through services and interfaces.
-
-Infrastructure: 
-> Handles database persistence, EF Core configurations, and repository implementations.
-
-API:
-> Exposes REST endpoints and configures dependency injection and middleware.
-
-### Architecture Flow
+### 🔄 Flow
 ```
-Client
-   │
-   ▼
-ASP.NET Core API (Controllers)
-   │
-   ▼
-Application Layer (Use Cases / Services)
-   │
-   ▼
-Domain Layer (Business Rules / Entities)
-   │
-   ▼
-Infrastructure Layer (EF Core / Repositories)
-   │
-   ▼
-SQL Server Database
+Client → API → Application → Domain → Infrastructure → Database
 ```
-This design ensures the core business logic remains independent of frameworks and external services.
+
+### 🧠 Layer Responsibilities
+
+- **Domain**
+  - Core business entities
+  - Enforces business rules and invariants
+  - Framework-independent
+
+- **Application**
+  - Orchestrates use cases
+  - Handles business logic
+  - Converts domain behavior into results
+
+- **Infrastructure**
+  - Handles data persistence (EF Core)
+  - Implements repositories
+
+- **API**
+  - Handles HTTP requests
+  - Performs validation
+  - Maps responses
 
 ---
 
-## Tech Stack
+## 🧠 Key Engineering Concepts
 
-- ASP.NET Core:	Web API framework
-- Entity Framework Core:	ORM for database access
-- SQL Server: Data persistence
-- Swagger / OpenAPI: API documentation
-- Dependency Injection: Service management
-- Repository Pattern: Data abstraction
-- DTO Pattern: Data transfer between layers
-- Result Pattern: Structured error handling
+- Clean Architecture
+- Domain-Driven Design (DDD)
+- SOLID Principles
+- Repository Pattern
+- Unit of Work Pattern
+- Result Pattern (structured error handling)
+- Optimistic Concurrency Control
+- RESTful API Design
+
+---
+
+## 🛠️ Tech Stack
+
+- ASP.NET Core Web API
+- Entity Framework Core
+- SQL Server
+- FluentValidation (manual validation)
+- Swagger (OpenAPI)
+- JWT Authentication
+
+---
+
+## 🔐 Security Features
+
+- JWT-based authentication
+- Protected endpoints using [Authorize]
+- Password hashing (no plain text storage)
+- User identity extracted from claims
+- Ownership-based resource access
+
+---
+
+## ⚙️ Advanced Features Implemented
+
+### 🔄 Concurrency Control
+
+To prevent race conditions and ensure data consistency:
+
+- Implemented **optimistic concurrency** using `RowVersion`
+- Detects conflicting updates automatically via EF Core
+- Returns **409 Conflict** when concurrent modifications occur
+- Prevents lost updates in high-concurrency scenarios
+
+### ✅ Validation Strategy
+
+- Implemented input validation using **FluentValidation**
+- Used **manual validation in controllers** for learning clarity
+- Ensures only valid data reaches the application layer
+
+### ⚠️ Error Handling
+
+- Global exception handling middleware for unexpected errors
+- Result pattern for controlled application errors
+- Centralized HTTP response mapping
+- Consistent API error responses
+
+---
+
+### ⚡ Performance Considerations
+
+- Optimized email validation using a **singleton Regex instance**
+- Reduced repeated allocations and GC pressure
+- Improved performance under concurrent requests
 
 ---
 
 ## Features
 
-### Wallet Management
+### 👤 Authentication
+- Register user
+- Login user (JWT token generation)
+
+### 💼 Wallet Management
 - Create wallet
 - Retrieve wallet details
-- Retrieve all wallets
+- Deposit funds
+- Withdraw funds
+- Transfer funds between wallets
 
-### Transactions
-- Add money
-- Send money
-- Record transaction history
-- Wallet Balance
-- Retrieve current wallet balance
-```
-GET /api/wallets/{walletId}/balance
-```
-Example response:
-```
-{
-  "walletId": "123",
-  "balance": 1150
-}
-```
+### 💸 Transactions
+
+- View transaction history
 
 ---
 
-## API Endpoints
+## 📡 API Endpoints
 
-Wallet Endpoints
+### 🔐 Auth
+```
+POST   /api/account/register
+POST   /api/account/login
+```
+
+### 💼 Wallet Endpoints
 ```
 GET    /api/wallets
-GET    /api/wallets/{id}
+GET    /api/wallets/{walletId}
 POST   /api/wallets
-GET    /api/wallets/{id}/balance
-```
-Transaction Endpoints
-```
-POST   /api/wallets/deposit
-POST   /api/wallets/transfer
-GET    /api/wallets/{walletId}/transactions
-POST   /api/transactions/{transactionId}/reverse
+POST   /api/wallets/{walletId}/deposit
+POST   /api/wallets/{walletId}/withdraw
+POST   /api/wallets/{WalletId}/transfer
 ```
 
-## ▶ Getting Started
+### 💸 Transaction Endpoints
+```
+GET   /api/Transactions
+GET   /api/Transactions/{walletId}
+```
+
+## ▶ Getting Started (Local)
 
 ### Prerequisites
 - .NET 8 SDK
@@ -219,51 +237,46 @@ Swagger provides a UI to test endpoints directly from the browser.
 
 ---
 
-## What I Learned
+📚 What I Learned
 
-Building this project provided practical experience in:
-- Designing scalable backend architectures
-- Applying Clean Architecture
-- Implementing Domain-Driven Design principles
-- Structuring maintainable backend systems
-- Building RESTful APIs with ASP.NET Core
-- Integrating SQL Server with Entity Framework Core
-- Implementing repository pattern and dependency injection
-- Modeling financial transaction systems
+- Designing scalable backend systems
+- Implementing secure authentication systems
+- Managing concurrency and data consistency
+- Structuring maintainable architectures
+- Handling real-world financial transaction logic
+- Building production-ready REST APIs
 
 ---
 
-## Future Improvements
+## 🚧 Future Improvements
 
-Planned improvements include:
-- JWT Authentication and authorization
-- Funding channels abstraction (Debit Card / Bank Transfer)
-- Currency conversion support
-- Database transactions for atomic transfers
-- Optimistic concurrency control
-- Rate limiting for API protection
-- Unit testing with xUnit
-- Integration testing
-- Docker containerization
-- Logging and monitoring
+- Automatic FluentValidation integration (pipeline/filter)
+- Logging with Serilog
+- API response standardization (ProblemDetails)
+- Retry policies for concurrency conflicts
+- Unit & integration testing
+- Rate limiting & API security hardening
+- Containerization (Docker)
 - CI/CD pipeline
+- Cloud deployment (AWS/Azure)
 
 ---
 
 ## Why I Built This Project
 
-This project was built to demonstrate the ability to:
-1. Design maintainable backend architectures
+This project demonstrates my ability to:
+1. Design scalable backend architectures
 2. Apply real-world software engineering principles
 3. Model financial domain logic
-4. Implement scalable REST APIs using ASP.NET Core
+4. Build production-ready APIs with ASP.NET Core
 
-It also serves as a learning platform for exploring how financial systems manage transactions and maintain data consistency.
+It also serves as a hands-on exploration of how financial systems ensure data integrity, security, and consistency.
 
 ---
-## Author
 
-Backend developer focused on building scalable backend systems and improving software architecture.
+## 👨‍💻 Author
+
+Backend developer focused on building scalable and secure systems.
 
 ### 🔗 Connect
 YouTube:  
@@ -274,6 +287,6 @@ LinkedIn:
 
 ---
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License.

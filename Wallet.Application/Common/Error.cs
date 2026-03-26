@@ -1,4 +1,4 @@
 ﻿namespace Wallet.Application.Common
 {
-    public record Error(ErrorType errorType, string message);
+    public record Error(ErrorType ErrorType, string Message);
 }

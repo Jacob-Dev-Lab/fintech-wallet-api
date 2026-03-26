@@ -48,34 +48,20 @@ namespace Wallet.Application.UseCases
             {
                 return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, ex.Message));
             }
-            catch
-            {
-                throw;
-            }
         }
 
         public async Task<Result<IReadOnlyList<WalletDto>>> GetByUserIdAsync(long userId)
         {
-            try
-            {
-                var wallets = await _walletRepository.FindByUserId(userId)
-                    .Select( w => new WalletDto
-                    {
-                        WalletId = w.WalletId,
-                        Currency = w.Currency.ToString(),
-                        Balance = w.Balance
-                    }).ToListAsync();
+            var wallets = await _walletRepository
+                .FindByUserId(userId)
+                .Select( w => new WalletDto
+                {
+                    WalletId = w.WalletId,
+                    Currency = w.Currency.ToString(),
+                    Balance = w.Balance
+                }).ToListAsync();
 
-                return Result<IReadOnlyList<WalletDto>>.Success(wallets);
-            }
-            catch (DomainException ex)
-            {
-                return Result<IReadOnlyList<WalletDto>>.Failure(new Error(ErrorType.NotFound, ex.Message));
-            }
-            catch
-            {
-                throw;
-            }
+            return Result<IReadOnlyList<WalletDto>>.Success(wallets);
         }
 
         public async Task<Result<WalletDto>> GetByWalletIdAsync(long userId, Guid walletId)
@@ -83,28 +69,21 @@ namespace Wallet.Application.UseCases
             if (walletId == Guid.Empty)
                 return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, "Invalid wallet id"));
 
-            try
+            var wallet = await _walletRepository
+                .FindByUserId(userId)
+                .FirstOrDefaultAsync(w => w.WalletId == walletId);
+
+            if (wallet is null)
+                return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, "Wallet not found"));
+
+            var response = new WalletDto
             {
-                var wallet = await _walletRepository
-                    .FindByUserId(userId)
-                    .FirstOrDefaultAsync(w => w.WalletId == walletId);
+                WalletId = wallet.WalletId,
+                Balance = wallet.Balance,
+                Currency = wallet.Currency.ToString()
+            };
 
-                if (wallet is null)
-                    return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, "Wallet not found"));
-
-                var response = new WalletDto
-                {
-                    WalletId = wallet.WalletId,
-                    Balance = wallet.Balance,
-                    Currency = wallet.Currency.ToString()
-                };
-
-                return Result<WalletDto>.Success(response);
-            }
-            catch (DomainException ex)
-            {
-                return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, ex.Message));
-            }
+            return Result<WalletDto>.Success(response);
         }
 
         public async Task<Result<WalletDto>> DepositAsync(long userId, Guid walletId, DepositRequest request)
@@ -115,15 +94,15 @@ namespace Wallet.Application.UseCases
             if (request.Amount <= 0)
                 return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, "Amount must be greater than zero."));
 
+            var wallet = await _walletRepository
+                .FindByUserId(userId)
+                .FirstOrDefaultAsync(w => w.WalletId == walletId);
+
+            if (wallet is null)
+                return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, "Wallet not found."));
+
             try
             {
-                var wallet = await _walletRepository
-                    .FindByUserId(userId)
-                    .FirstOrDefaultAsync(w => w.WalletId == walletId);
-
-                if (wallet is null)
-                    return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, "Wallet not found."));
-
                 await _unitOfWork.ExecuteTransactionAsync(async () =>
                 {
                     wallet.Deposit(request.Amount);
@@ -140,20 +119,25 @@ namespace Wallet.Application.UseCases
                     _transactionRepository.Add(transaction);
                     await Task.CompletedTask;
                 });
-
-                var response = new WalletDto
-                {
-                    WalletId = wallet.WalletId,
-                    Currency = wallet.Currency.ToString(),
-                    Balance = wallet.Balance
-                };  
-                    
-                return Result<WalletDto>.Success(response);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Result<WalletDto>.Failure(new Error(
+                    ErrorType.Conflict, "Error: Multiple update, Try again later."));
             }
             catch (DomainException ex)
             {
                 return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, ex.Message));
             }
+
+            var response = new WalletDto
+            {
+                WalletId = wallet.WalletId,
+                Currency = wallet.Currency.ToString(),
+                Balance = wallet.Balance
+            };  
+                    
+            return Result<WalletDto>.Success(response);
         }
 
         public async Task<Result<WalletDto>> WithdrawAsync(long userId, Guid walletId, WithdrawalRequest request)
@@ -164,15 +148,15 @@ namespace Wallet.Application.UseCases
             if (request.Amount <= 0)
                 return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, "Amount must be greater than zero."));
 
+            var wallet = await _walletRepository
+                .FindByUserId(userId)
+                .FirstOrDefaultAsync(w => w.WalletId == walletId);
+
+            if (wallet is null)
+                return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, "Wallet not found"));
+
             try
             {
-                var wallet = await _walletRepository
-                    .FindByUserId(userId)
-                    .FirstOrDefaultAsync(w => w.WalletId == walletId);
-
-                if (wallet is null)
-                    return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, "Wallet not found"));
-
                 await _unitOfWork.ExecuteTransactionAsync(async () =>
                 {
                     wallet.Withdraw(request.Amount);
@@ -189,24 +173,29 @@ namespace Wallet.Application.UseCases
                     _transactionRepository.Add(transaction);
                     await Task.CompletedTask;
                 });
-
-                var response = new WalletDto
-                {
-                    WalletId = wallet.WalletId,
-                    Balance = wallet.Balance
-                };
-
-                return Result<WalletDto>.Success(response);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Result<WalletDto>.Failure(new Error(
+                    ErrorType.Conflict, "Error: Multiple update, Try again later."));
             }
             catch (DomainException ex)
             {
                 return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, ex.Message));
             }
+
+            var response = new WalletDto
+            {
+                WalletId = wallet.WalletId,
+                Balance = wallet.Balance
+            };
+
+            return Result<WalletDto>.Success(response);
         }
 
         public async Task<Result<WalletDto>> TransferAsync(long userId, Guid walletId, TransferRequest request)
         {
-            if (walletId == Guid.Empty)
+            if (walletId == Guid.Empty || request.ReceivingWalletId == Guid.Empty)
                 return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, "Invalid wallet id."));
 
             if (request.Amount <= 0)
@@ -214,21 +203,22 @@ namespace Wallet.Application.UseCases
 
             if (walletId == request.ReceivingWalletId)
                 return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, "Cannot transfer to self."));
+            
+            var sender = await _walletRepository
+                .FindByUserId(userId)
+                .FirstOrDefaultAsync(w => w.WalletId == walletId);
+
+            var receiver = await _walletRepository
+                .FindByWalletIdAsync(request.ReceivingWalletId!);
+
+            if (sender is null || receiver is null)
+                return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, "Either of the wallet is invalid"));
+
+            var senderWalletId = walletId;
+            var receiverWalletId = request.ReceivingWalletId;
 
             try
             {
-                var sender = await _walletRepository
-                    .FindByUserId(userId)
-                    .FirstOrDefaultAsync(w => w.WalletId == walletId);
-
-                var receiver = await _walletRepository.FindByWalletIdAsync(request.ReceivingWalletId);
-
-                if (sender is null || receiver is null)
-                    return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, "Either of the wallet is invalid"));
-
-                var senderWalletId = walletId;
-                var receiverWalletId = request.ReceivingWalletId;
-
                 await _unitOfWork.ExecuteTransactionAsync(async () =>
                 {
                     sender.TransferTo(receiver, request.Amount);
@@ -257,21 +247,26 @@ namespace Wallet.Application.UseCases
                     _transactionRepository.Add(receiverTransaction);
                     await Task.CompletedTask;
                 });
-
-                var response = new WalletDto
-                {
-                    WalletId = senderWalletId,
-                    Currency = sender.Currency.ToString(),
-                    Balance = sender.Balance
-
-                };
-
-                return Result<WalletDto>.Success(response);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Result<WalletDto>.Failure(new Error(
+                    ErrorType.Conflict, "Error: Multiple update, Try again later."));
             }
             catch (DomainException ex)
             {
                 return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, ex.Message));
             }
+
+            var response = new WalletDto
+            {
+                WalletId = senderWalletId,
+                Currency = sender.Currency.ToString(),
+                Balance = sender.Balance
+
+            };
+
+            return Result<WalletDto>.Success(response);
         }
     }
 }

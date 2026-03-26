@@ -1,9 +1,10 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Azure;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Wallet.Api.Common;
 using Wallet.Application.Dtos.Requests;
 using Wallet.Application.Interfaces;
 
@@ -14,34 +15,43 @@ namespace Wallet.Api.Controllers
     public class AccountController : ControllerBase
     { 
         private readonly IUserService _userService;
-        private readonly StatusResponse _response;
 
-        public AccountController(IUserService userService, StatusResponse response)
+        public AccountController(IUserService userService)
         {
             _userService = userService;
-            _response = response;
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterAsync([FromBody] CreateUserRequest request)
+        public async Task<IActionResult> RegisterAsync([FromBody] CreateUserRequest request,
+            IValidator<CreateUserRequest> validator)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            var validationResult = await validator.ValidateAsync(request);
+
+            if (!validationResult.IsValid)
+                return BadRequest(validationResult.ToErrorResponse());
+
             var result = await _userService.CreateAsync(request);
 
             if (!result.IsSuccess)
-                return _response.Action(result.Error!);
+                return StatusResponse.ToActionResult(result.Error!);
 
-            return Created(nameof(result), result.Value);
+            return CreatedAtAction(nameof(RegisterAsync), new { id = result.Value!.Id }, result.Value);
+            //return Created(nameof(result), result.Value);
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> LoginAsync([FromBody] UserLoginRequest request)
+        public async Task<IActionResult> LoginAsync([FromBody] UserLoginRequest request,
+            IValidator<UserLoginRequest> validator)
         {
+            var validationResult = await validator.ValidateAsync(request);
+
+            if (!validationResult.IsValid)
+                return BadRequest(validationResult.ToErrorResponse());
+
             var result = await _userService.LoginAsync(request);
 
             if (!result.IsSuccess)
-                return BadRequest(result.Error);
+                return StatusResponse.ToActionResult(result.Error!);
 
             var claims = new[]
             {

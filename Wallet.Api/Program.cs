@@ -1,8 +1,11 @@
 using System.Text;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Wallet.Api;
+using Wallet.Api.Middleware;
+using Wallet.Api.Validators;
+using Wallet.Application.Dtos.Requests;
 using Wallet.Application.Interfaces;
 using Wallet.Application.UseCases;
 using Wallet.Application.Utilities;
@@ -12,12 +15,23 @@ using Wallet.Infrastructure.Repository;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+// Controller services
 builder.Services.AddControllers();
 
+// Validator services
+builder.Services.AddScoped<IValidator<CreateUserRequest>, CreateUserRequestValidator>();
+builder.Services.AddScoped<IValidator<UserLoginRequest>,  UserLoginRequestValidator>();
+builder.Services.AddScoped<IValidator<DepositRequest>, DepositRequestValidator>();
+builder.Services.AddScoped<IValidator<WithdrawalRequest>, WithdrawalRequestValidator>();
+builder.Services.AddScoped<IValidator<TransferRequest>, TransferRequestValidator>();
+
+// Db connection service
 var dbConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<WalletApiDbContext>(options
     => options.UseSqlServer(dbConnection));
 
+// JWT authentication service
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
     {
@@ -31,16 +45,20 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 
+// Repository services
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// Usecase services
 builder.Services.AddScoped<IWalletService, WalletService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
-builder.Services.AddTransient<IEmailValidator, EmailValidator>();
-builder.Services.AddTransient<IPasswordHasher, PasswordHasher>();
-builder.Services.AddTransient<StatusResponse>();
+
+// Utilities
+builder.Services.AddSingleton<IEmailValidator, EmailValidator>();
+builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -66,7 +84,7 @@ builder.Services.AddSwaggerGen(options =>
                         Id = "Bearer"
                     }
                 },
-                new string[] {}
+                Array.Empty<string>()
             }
         });
     });
@@ -80,8 +98,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Middleware pipeline
+app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
 app.Run();

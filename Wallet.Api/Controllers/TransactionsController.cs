@@ -11,12 +11,10 @@ namespace Wallet.Api.Controllers
     public class TransactionsController : ControllerBase
     {
         private readonly ITransactionService _transactionService;
-        private readonly StatusResponse _response;
 
-        public TransactionsController(ITransactionService transactionService, StatusResponse response)
+        public TransactionsController(ITransactionService transactionService)
         {
             _transactionService = transactionService;
-            _response = response;
         }
 
         [HttpGet]
@@ -30,7 +28,7 @@ namespace Wallet.Api.Controllers
             var result = await _transactionService.GetByUserIdAsync(userId);
 
             if (!result.IsSuccess)
-                return _response.Action(result.Error!); ;
+                return StatusResponse.ToActionResult(result.Error!); ;
 
             return Ok(result.Value);
         }
@@ -46,7 +44,7 @@ namespace Wallet.Api.Controllers
             var result = await _transactionService.GetByWalletIdAsync(userId, walletId);
 
             if (!result.IsSuccess)
-                return _response.Action(result.Error!);
+                return StatusResponse.ToActionResult(result.Error!);
 
             return Ok(result.Value);
         }

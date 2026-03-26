@@ -4,25 +4,17 @@ using Wallet.Application.Interfaces;
 
 namespace Wallet.Application.Utilities
 {
-    public class EmailValidator : IEmailValidator
+    public partial class EmailValidator : IEmailValidator
     {
-        private readonly Regex emailRegex = new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        [GeneratedRegex(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-GB")]
+        private static partial Regex EmailRegex();
+
         public bool IsValid(string email)
         {
-            if (string.IsNullOrEmpty(email))
+            if (string.IsNullOrWhiteSpace(email))
                 return false;
 
-            if (!emailRegex.IsMatch(email))
-                return false;
-
-            if (!MailAddress.TryCreate(email, out var emailAddress))
-                return false;
-
-            if (emailAddress.Address != email)
-                return false;
-
-            return true;
+            return EmailRegex().IsMatch(email);
         }
     }
 }

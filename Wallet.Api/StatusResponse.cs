@@ -3,15 +3,16 @@ using Wallet.Application.Common;
 
 namespace Wallet.Api
 {
-    public class StatusResponse
+    public static class StatusResponse
     {
-        public IActionResult Action(Error error)
+        public static IActionResult ToActionResult(Error error)
         {
-            return error.errorType switch
+            return error.ErrorType switch
             {
-                ErrorType.NotFound => new NotFoundObjectResult(error.message),
-                ErrorType.BadRequest => new BadRequestObjectResult(error.message),
-                ErrorType.Conflict => new ConflictObjectResult(error.message),
+                ErrorType.NotFound => new NotFoundObjectResult(error.Message),
+                ErrorType.BadRequest => new BadRequestObjectResult(error.Message),
+                ErrorType.Conflict => new ConflictObjectResult(error.Message),
+                ErrorType.Unauthorized => new UnauthorizedObjectResult(error.Message),
                 _ => new StatusCodeResult(500)
             };
         }

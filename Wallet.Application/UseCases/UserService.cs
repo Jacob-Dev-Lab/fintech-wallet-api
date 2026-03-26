@@ -16,7 +16,7 @@ namespace Wallet.Application.UseCases
         private readonly IPasswordHasher _hasher;
         private readonly IEmailValidator _emailValidator;
 
-        public UserService(IUserRepository userRepository, IUnitOfWork unitOfWork, 
+        public UserService(IUserRepository userRepository, IUnitOfWork unitOfWork,
             IPasswordHasher passwordHasher, IEmailValidator emailValidator)
         {
             _userRepository = userRepository;
@@ -72,31 +72,23 @@ namespace Wallet.Application.UseCases
 
         public async Task<Result<UserDto>> GetByIdAsync(long Id)
         {
-            try
-            {
-                var user = await _userRepository.FindByIdAsync(Id);
+            var user = await _userRepository.FindByIdAsync(Id);
 
-                if (user is null)
-                    return Result<UserDto>.Failure(new Error(ErrorType.NotFound, "Wallet not found."));
+            if (user is null)
+                return Result<UserDto>.Failure(new Error(ErrorType.NotFound, "Wallet not found."));
 
-                return Result<UserDto>.Success(new UserDto
-                {
-                    Id = user.Id,
-                    Name = user.Name,
-                    Email = user.Email
-                });
-            }
-            catch (DomainException ex)
+            return Result<UserDto>.Success(new UserDto
             {
-                return Result<UserDto>.Failure(new Error(ErrorType.BadRequest, ex.Message));
-            }
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email
+            });
         }
 
         public async Task<Result<IReadOnlyList<UserDto>>> GetAllAsync()
         {
-            try
-            {
-                var users = await _userRepository.FindAll()
+            var users = await _userRepository
+                .FindAll()
                 .Select(u => new UserDto
                 {
                     Id = u.Id,
@@ -105,12 +97,7 @@ namespace Wallet.Application.UseCases
                 })
                 .ToListAsync();
 
-                return Result<IReadOnlyList<UserDto>>.Success(users);
-            }
-            catch (DomainException ex)
-            {
-                return Result<IReadOnlyList<UserDto>>.Failure(new Error(ErrorType.BadRequest, ex.Message));
-            }
+            return Result<IReadOnlyList<UserDto>>.Success(users);
         }
 
         public async Task<Result<UserLoginDto>> LoginAsync(UserLoginRequest request)
@@ -118,27 +105,25 @@ namespace Wallet.Application.UseCases
             if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
                 return Result<UserLoginDto>
                     .Failure(new Error(ErrorType.BadRequest, "Usrname/Password required"));
-            
-            try
-            {
-                var user = await _userRepository.FindByEmailAsync(request.Email);
 
-                if (user is null)
-                    return Result<UserLoginDto>
-                        .Failure(new Error(ErrorType.BadRequest, "Incorrect Username/Password."));
+            var email = request.Email.Trim().ToLowerInvariant();
 
-                if (!_hasher.Verify(user.PasswordHash, request.Password))
-                    return Result<UserLoginDto>
-                        .Failure(new Error(ErrorType.BadRequest, "Incorrect Username/Password."));
+            var user = await _userRepository.FindByEmailAsync(email);
 
+            if (user is null)
                 return Result<UserLoginDto>
-                        .Success(new UserLoginDto { UserId = user.Id, Email = user.Email});
-            }
-            catch (DomainException ex)
-            {
+                    .Failure(new Error(ErrorType.Unauthorized, "Incorrect Username/Password."));
+
+            if (!_hasher.Verify(user.PasswordHash, request.Password))
                 return Result<UserLoginDto>
-                        .Failure(new Error(ErrorType.BadRequest, ex.Message));
-            }
+                    .Failure(new Error(ErrorType.Unauthorized, "Incorrect Username/Password."));
+
+            return Result<UserLoginDto>
+                    .Success(new UserLoginDto 
+                    { 
+                        UserId = user.Id, 
+                        Email = user.Email 
+                    });
         }
     }
 }

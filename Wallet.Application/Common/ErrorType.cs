@@ -4,6 +4,7 @@
     {
         NotFound,
         BadRequest,
-        Conflict
+        Conflict,
+        Unauthorized
     }
 }

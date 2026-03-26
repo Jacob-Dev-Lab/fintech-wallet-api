@@ -4,13 +4,7 @@ namespace Wallet.Application.Dtos.Requests
 {
     public class UserLoginRequest
     {
-        [Required]
-        [EmailAddress]
-        [MaxLength(100)]
-        public string? Email { get; set; }
-
-        [Required]
-        [MaxLength(100)]
-        public string? Password { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
     }
 }

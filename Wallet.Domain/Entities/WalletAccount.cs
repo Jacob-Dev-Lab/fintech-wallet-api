@@ -1,4 +1,5 @@
-﻿using Wallet.Domain.Enums;
+﻿using System.ComponentModel.DataAnnotations;
+using Wallet.Domain.Enums;
 using Wallet.Domain.Exceptions;
 
 namespace Wallet.Domain.Entities
@@ -13,6 +14,9 @@ namespace Wallet.Domain.Entities
         public bool IsActive { get; private set; }
         public bool IsDeleted { get; private set; }
         public DateTime CreatedAt { get; private set; }
+
+        [Timestamp]
+        public byte[]? RowVersion { get; private set; }
 
         public WalletAccount() { } //EF Core Constructor
 
