@@ -81,7 +81,8 @@ namespace Wallet.Application.UseCases
             {
                 Id = user.Id,
                 Name = user.Name,
-                Email = user.Email
+                Email = user.Email,
+                DeactivatedAt = user.DeactivatedAt
             });
         }
 

@@ -70,6 +70,38 @@ namespace Wallet.Api.Controllers
             return Created($"api/wallets/{wallet.WalletId}", wallet);
         }
 
+        [HttpPost("{walletId}/freeze")]
+        public async Task<IActionResult> Freeze(Guid walletId)
+        {
+            var userClaim = User.FindFirstValue(ClaimTypes.Name);
+
+            if (!long.TryParse(userClaim, out long userId))
+                return Unauthorized(userId);
+
+            var result = await _service.FreezWalletAsync(userId, walletId);
+
+            if (!result.IsSuccess)
+                return StatusResponse.ToActionResult(result.Error!);
+
+            return Ok(new {message = "Wallet frozen successfuly."});
+        }
+
+        [HttpPost("{walletId}/unfreeze")]
+        public async Task<IActionResult> Unfreeze(Guid walletId)
+        {
+            var userClaim = User.FindFirstValue(ClaimTypes.Name);
+
+            if (!long.TryParse(userClaim, out long userId))
+                return Unauthorized(userId);
+
+            var result = await _service.UnfreezWalletAsync(userId, walletId);
+
+            if (!result.IsSuccess)
+                return StatusResponse.ToActionResult(result.Error!);
+
+            return Ok(new { message = "Wallet unfrozen successfuly." });
+        }
+
         [HttpPost("{walletId}/deposit")]
         public async Task<IActionResult> Deposit(Guid walletId, [FromBody] DepositRequest request,
             IValidator<DepositRequest> validator)

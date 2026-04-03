@@ -9,10 +9,10 @@ namespace Wallet.Api
         {
             return error.ErrorType switch
             {
-                ErrorType.NotFound => new NotFoundObjectResult(error.Message),
-                ErrorType.BadRequest => new BadRequestObjectResult(error.Message),
-                ErrorType.Conflict => new ConflictObjectResult(error.Message),
-                ErrorType.Unauthorized => new UnauthorizedObjectResult(error.Message),
+                ErrorType.NotFound => new NotFoundObjectResult(new { errors = error.Message } ),
+                ErrorType.BadRequest => new BadRequestObjectResult(new { errors = error.Message }),
+                ErrorType.Conflict => new ConflictObjectResult(new { errors = error.Message }),
+                ErrorType.Unauthorized => new UnauthorizedObjectResult(new { errors = error.Message }),  
                 _ => new StatusCodeResult(500)
             };
         }

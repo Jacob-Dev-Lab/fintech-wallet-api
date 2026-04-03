@@ -21,6 +21,12 @@ namespace Wallet.Infrastructure.Repository
             _dbContext.Wallets.Add(wallet);
         }
 
+        public async Task<WalletAccount?> FindByWalletIdAsync(long userId, Guid walletId)
+        {
+            return await _dbContext.Wallets
+                .FirstOrDefaultAsync(w => w.UserId == userId && w.WalletId == walletId);
+        }
+
         public async Task<WalletAccount?> FindByWalletIdAsync(Guid walletId)
         {
             return await _dbContext.Wallets

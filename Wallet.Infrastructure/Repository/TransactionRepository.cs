@@ -18,13 +18,21 @@ namespace Wallet.Infrastructure.Repository
         {
             ArgumentNullException.ThrowIfNull(transaction);
 
-            _dbContext.Transactions.AddAsync(transaction);
+            _dbContext.Transactions.Add(transaction);
         }
 
         public async Task<Transaction?> FindByIdAsync(Guid transactionId)
         {
             return await _dbContext.Transactions
+                .AsNoTracking()
                 .FirstOrDefaultAsync(t => t.TransactionId == transactionId);
+        }
+
+        public async Task<Transaction?> FindByWalletIdAsync(Guid walletId)
+        {
+            return await _dbContext.Transactions
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.WalletId == walletId);
         }
 
         public IQueryable<Transaction> FindByUserId(long userId)

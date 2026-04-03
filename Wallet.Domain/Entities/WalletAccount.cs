@@ -16,9 +16,16 @@ namespace Wallet.Domain.Entities
         public DateTime CreatedAt { get; private set; }
 
         [Timestamp]
-        public byte[]? RowVersion { get; private set; }
+        public byte[] RowVersion { get; private set; }
 
-        public WalletAccount() { } //EF Core Constructor
+        private WalletAccount() { } //EF Core Constructor
+
+        public WalletAccount(Guid walletId, Currency currency, decimal balance)
+        {
+            WalletId = walletId;
+            Currency = currency;
+            Balance = balance;
+        }
 
         public WalletAccount(long userId, Currency currency)
         {
@@ -41,6 +48,15 @@ namespace Wallet.Domain.Entities
 
             IsActive = false;
         }
+
+        public void UnFreeze()
+        {
+            if (IsActive)
+                throw new DomainException("Wallet already Active");
+
+            IsActive = true;
+        }
+
         public void Delete()
         {
             if (IsDeleted)

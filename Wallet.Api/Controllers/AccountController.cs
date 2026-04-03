@@ -35,8 +35,8 @@ namespace Wallet.Api.Controllers
             if (!result.IsSuccess)
                 return StatusResponse.ToActionResult(result.Error!);
 
-            return CreatedAtAction(nameof(RegisterAsync), new { id = result.Value!.Id }, result.Value);
-            //return Created(nameof(result), result.Value);
+            //return CreatedAtAction(nameof(RegisterAsync), new { id = result.Value!.Id }, result.Value);
+            return Created(nameof(RegisterAsync), new {message = "You are successfully registered"});
         }
 
         [HttpPost("login")]

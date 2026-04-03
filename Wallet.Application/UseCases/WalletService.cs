@@ -15,7 +15,7 @@ namespace Wallet.Application.UseCases
         private readonly ITransactionRepository _transactionRepository;
         private readonly IUnitOfWork _unitOfWork;
 
-        public WalletService(IWalletRepository walletRepository, 
+        public WalletService(IWalletRepository walletRepository,
             ITransactionRepository transactionRepository,
             IUnitOfWork unitOfWork)
         {
@@ -28,7 +28,7 @@ namespace Wallet.Application.UseCases
         {
             try
             {
-                var currencyType = (Currency) currency;
+                var currencyType = (Currency)currency;
 
                 var wallet = new WalletAccount(userId, currencyType);
 
@@ -54,7 +54,7 @@ namespace Wallet.Application.UseCases
         {
             var wallets = await _walletRepository
                 .FindByUserId(userId)
-                .Select( w => new WalletDto
+                .Select(w => new WalletDto
                 {
                     WalletId = w.WalletId,
                     Currency = w.Currency.ToString(),
@@ -69,9 +69,7 @@ namespace Wallet.Application.UseCases
             if (walletId == Guid.Empty)
                 return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, "Invalid wallet id"));
 
-            var wallet = await _walletRepository
-                .FindByUserId(userId)
-                .FirstOrDefaultAsync(w => w.WalletId == walletId);
+            var wallet = await _walletRepository.FindByWalletIdAsync(userId, walletId);
 
             if (wallet is null)
                 return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, "Wallet not found"));
@@ -94,12 +92,10 @@ namespace Wallet.Application.UseCases
             if (request.Amount <= 0)
                 return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, "Amount must be greater than zero."));
 
-            var wallet = await _walletRepository
-                .FindByUserId(userId)
-                .FirstOrDefaultAsync(w => w.WalletId == walletId);
+            var wallet = await _walletRepository.FindByWalletIdAsync(userId, walletId);
 
             if (wallet is null)
-                return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, "Wallet not found."));
+                return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, "Wallet not found"));
 
             try
             {
@@ -135,8 +131,8 @@ namespace Wallet.Application.UseCases
                 WalletId = wallet.WalletId,
                 Currency = wallet.Currency.ToString(),
                 Balance = wallet.Balance
-            };  
-                    
+            };
+
             return Result<WalletDto>.Success(response);
         }
 
@@ -148,9 +144,7 @@ namespace Wallet.Application.UseCases
             if (request.Amount <= 0)
                 return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, "Amount must be greater than zero."));
 
-            var wallet = await _walletRepository
-                .FindByUserId(userId)
-                .FirstOrDefaultAsync(w => w.WalletId == walletId);
+            var wallet = await _walletRepository.FindByWalletIdAsync(userId, walletId);
 
             if (wallet is null)
                 return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, "Wallet not found"));
@@ -187,6 +181,7 @@ namespace Wallet.Application.UseCases
             var response = new WalletDto
             {
                 WalletId = wallet.WalletId,
+                Currency = wallet.Currency.ToString(),
                 Balance = wallet.Balance
             };
 
@@ -203,13 +198,12 @@ namespace Wallet.Application.UseCases
 
             if (walletId == request.ReceivingWalletId)
                 return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, "Cannot transfer to self."));
-            
+
             var sender = await _walletRepository
-                .FindByUserId(userId)
-                .FirstOrDefaultAsync(w => w.WalletId == walletId);
+                .FindByWalletIdAsync(userId, walletId);
 
             var receiver = await _walletRepository
-                .FindByWalletIdAsync(request.ReceivingWalletId!);
+                .FindByWalletIdAsync(request.ReceivingWalletId);
 
             if (sender is null || receiver is null)
                 return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, "Either of the wallet is invalid"));
@@ -267,6 +261,68 @@ namespace Wallet.Application.UseCases
             };
 
             return Result<WalletDto>.Success(response);
+        }
+
+        public async Task<Result> FreezWalletAsync(long userId, Guid walletId)
+        {
+            if (walletId == Guid.Empty)
+                return Result.Failure(new Error(ErrorType.BadRequest, "Invalid wallet id"));
+
+            var wallet = await _walletRepository.FindByWalletIdAsync(userId, walletId);
+
+            if (wallet is null)
+                return Result.Failure(new Error(ErrorType.NotFound, "Wallet not found"));
+
+            if (!wallet.IsActive)
+                return Result.Failure(new Error(ErrorType.BadRequest, "Wallet is already frozen."));
+
+            try
+            {
+                wallet.Freeze();
+                _walletRepository.Update(wallet);
+                await _unitOfWork.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Result.Failure(new Error(
+                    ErrorType.Conflict, "Error: Multiple update, Try again later."));
+            }
+            catch (DomainException ex)
+            {
+                return Result.Failure(new Error(ErrorType.BadRequest, ex.Message));
+            }
+
+            return Result.Success();
+        }
+
+        public async Task<Result> UnfreezWalletAsync(long userId, Guid walletId)
+        {
+            if (walletId == Guid.Empty)
+                return Result.Failure(new Error(ErrorType.BadRequest, "Invalid wallet id"));
+
+            var wallet = await _walletRepository.FindByWalletIdAsync(userId, walletId);
+
+            if (wallet is null)
+                return Result.Failure(new Error(ErrorType.NotFound, "Wallet not found"));
+
+            if (wallet.IsActive)
+                return Result.Failure(new Error(ErrorType.BadRequest, "Wallet is already active."));
+            try
+            {
+                wallet.UnFreeze();
+                _walletRepository.Update(wallet);
+                await _unitOfWork.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return Result.Failure(new Error(
+                    ErrorType.Conflict, "Error: Multiple update, Try again later."));
+            }
+            catch (DomainException ex)
+            {
+                return Result.Failure(new Error(ErrorType.BadRequest, ex.Message));
+            }
+            return Result.Success();
         }
     }
 }

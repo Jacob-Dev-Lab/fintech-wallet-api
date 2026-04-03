@@ -13,9 +13,20 @@ namespace Wallet.Infrastructure.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            builder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+
             builder.Entity<WalletAccount>()
                 .Property(w => w.Balance)
                 .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<WalletAccount>()
+                .HasIndex(w => w.WalletId)
+                .IsUnique();
+
+            builder.Entity<WalletAccount>()
+                .HasIndex(w => w.UserId);
 
             builder.Entity<Transaction>()
                 .Property(t => t.Amount)
@@ -24,6 +35,16 @@ namespace Wallet.Infrastructure.Data
             builder.Entity<Transaction>()
                 .Property(t => t.Balance)
                 .HasColumnType("decimal(18, 2)");
+
+            builder.Entity<Transaction>()
+                .HasIndex(t => t.UserId);
+
+            builder.Entity<Transaction>()
+                .HasIndex(t => t.WalletId);
+
+            builder.Entity<Transaction>()
+                .HasIndex(t => t.TransactionId)
+                .IsUnique();
         }
     }
 }

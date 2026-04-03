@@ -28,12 +28,15 @@ namespace Wallet.Infrastructure.Repository
 
         public IQueryable<User> FindAll()
         {
-            return _dbContext.Users.AsNoTracking();
+            return _dbContext.Users
+                .AsNoTracking();
         }
 
         public async Task<User?> FindByEmailAsync(string email)
         {
-            return await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
+            return await _dbContext.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Email == email);
         }
 
         public void Update(User user)

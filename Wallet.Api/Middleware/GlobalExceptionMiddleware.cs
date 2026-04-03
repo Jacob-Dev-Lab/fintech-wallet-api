@@ -15,13 +15,10 @@
             {
                 await _next(context);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 context.Response.StatusCode = 500;
-                await context.Response.WriteAsJsonAsync(new
-                {
-                    message = ex.Message,
-                });
+                await context.Response.WriteAsync("An unexpected error occurred");
             }
         }
     }
