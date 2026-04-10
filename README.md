@@ -145,8 +145,11 @@ To prevent race conditions and ensure data consistency:
 ### ⚡ Performance Considerations
 
 - Optimized email validation using a **singleton Regex instance**
+- Enhanced repository performance through query optimization
 - Reduced repeated allocations and GC pressure
 - Improved performance under concurrent requests
+- Introduced database indexing to improve query execution and scalability
+- API response standardization (ProblemDetails)
 
 ---
 
@@ -159,6 +162,7 @@ To prevent race conditions and ensure data consistency:
 ### 💼 Wallet Management
 - Create wallet
 - Retrieve wallet details
+- Freeze/Unfreeze Wallet
 - Deposit funds
 - Withdraw funds
 - Transfer funds between wallets
@@ -182,6 +186,8 @@ POST   /api/account/login
 GET    /api/wallets
 GET    /api/wallets/{walletId}
 POST   /api/wallets
+POST   /api/wallets/{walletId}/freeze
+POST   /api/wallets/{walletId}/unfreeze
 POST   /api/wallets/{walletId}/deposit
 POST   /api/wallets/{walletId}/withdraw
 POST   /api/wallets/{WalletId}/transfer
@@ -245,6 +251,7 @@ Swagger provides a UI to test endpoints directly from the browser.
 - Structuring maintainable architectures
 - Handling real-world financial transaction logic
 - Building production-ready REST APIs
+- Optimizing queries for efficient database performance
 
 ---
 
@@ -252,7 +259,6 @@ Swagger provides a UI to test endpoints directly from the browser.
 
 - Automatic FluentValidation integration (pipeline/filter)
 - Logging with Serilog
-- API response standardization (ProblemDetails)
 - Retry policies for concurrency conflicts
 - Unit & integration testing
 - Rate limiting & API security hardening

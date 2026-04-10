@@ -26,7 +26,7 @@ namespace Wallet.Api.Controllers
             var userClaim = User.FindFirstValue(ClaimTypes.Name);
 
             if (!long.TryParse(userClaim, out long userId))
-                return Unauthorized(userId);
+                return Unauthorized(new { message = "Invalid or missing authentication token." });
 
             var result = await _service.GetByUserIdAsync(userId);
 
@@ -42,7 +42,7 @@ namespace Wallet.Api.Controllers
             var userClaim = User.FindFirstValue(ClaimTypes.Name);
 
             if (!long.TryParse(userClaim, out long userId))
-                return Unauthorized(userId);
+                return Unauthorized(new { message = "Invalid or missing authentication token." });
 
             var result = await _service.GetByWalletIdAsync(userId, walletId);
 
@@ -58,7 +58,7 @@ namespace Wallet.Api.Controllers
             var userClaim = User.FindFirstValue(ClaimTypes.Name);
 
             if (!long.TryParse(userClaim, out long userId))
-                return Unauthorized(userId);
+                return Unauthorized(new { message = "Invalid or missing authentication token." });
 
             var result = await _service.CreateAsync(userId, request.Currency);
 
@@ -76,7 +76,7 @@ namespace Wallet.Api.Controllers
             var userClaim = User.FindFirstValue(ClaimTypes.Name);
 
             if (!long.TryParse(userClaim, out long userId))
-                return Unauthorized(userId);
+                return Unauthorized(new { message = "Invalid or missing authentication token." });
 
             var result = await _service.FreezWalletAsync(userId, walletId);
 
@@ -92,7 +92,7 @@ namespace Wallet.Api.Controllers
             var userClaim = User.FindFirstValue(ClaimTypes.Name);
 
             if (!long.TryParse(userClaim, out long userId))
-                return Unauthorized(userId);
+                return Unauthorized(new { message = "Invalid or missing authentication token." });
 
             var result = await _service.UnfreezWalletAsync(userId, walletId);
 
@@ -114,7 +114,7 @@ namespace Wallet.Api.Controllers
             var userClaim = User.FindFirstValue(ClaimTypes.Name);
 
             if (!long.TryParse(userClaim, out long userId))
-                return Unauthorized(userId);
+                return Unauthorized(new { message = "Invalid or missing authentication token." });
 
             var result = await _service.DepositAsync(userId, walletId, request);
 
@@ -136,7 +136,7 @@ namespace Wallet.Api.Controllers
             var userClaim = User.FindFirstValue(ClaimTypes.Name);
 
             if (!long.TryParse(userClaim, out long userId))
-                return Unauthorized(userId);
+                return Unauthorized(new { message = "Invalid or missing authentication token." });
 
             var result = await _service.WithdrawAsync(userId, walletId, request);
 
@@ -158,7 +158,7 @@ namespace Wallet.Api.Controllers
             var userClaim = User.FindFirstValue(ClaimTypes.Name);
 
             if (!long.TryParse(userClaim, out long userId))
-                return Unauthorized(userId);
+                return Unauthorized(new { message = "Invalid or missing authentication token." });
 
             var result = await _service.TransferAsync(userId, walletId, request);
 

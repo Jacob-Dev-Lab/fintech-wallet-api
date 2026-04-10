@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using Wallet.Api.Middleware;
 using Wallet.Api.Validators;
 using Wallet.Application.Dtos.Requests;
@@ -31,6 +32,18 @@ builder.Services.AddScoped<IValidator<TransferRequest>, TransferRequestValidator
 var dbConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<WalletApiDbContext>(options
     => options.UseSqlServer(dbConnection));
+
+// Logging configuration
+//Log.Logger = new LoggerConfiguration()
+//    .ReadFrom.Configuration(builder.Configuration)
+//    .CreateLogger();
+
+builder.Host.UseSerilog((context, services, configuration) => {
+        configuration
+            .ReadFrom.Configuration(context.Configuration)
+            .ReadFrom.Services(services)
+            .Enrich.FromLogContext();
+    });
 
 // JWT authentication service
 builder.Services.AddAuthentication("Bearer")
@@ -100,6 +113,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // Middleware pipeline
+app.UseSerilogRequestLogging();
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthentication();
