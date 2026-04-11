@@ -1,4 +1,6 @@
-﻿namespace Wallet.Application.Common
+﻿using Wallet.Application.Common.Enum;
+
+namespace Wallet.Application.Common
 {
     public class Result
     {
@@ -23,4 +25,6 @@
         public static Result<T> Success(T value) => new (value);
         public static new Result<T> Failure(Error error) => new (error);
     }
+
+    public record Error(ErrorType ErrorType, IEnumerable<string> Messages);
 }

@@ -12,8 +12,8 @@ namespace Wallet.Application.Interfaces
         Task<Result<WalletDto>> DepositAsync(long userId, Guid walletId, DepositRequest request);
         Task<Result<WalletDto>> WithdrawAsync(long userId, Guid walletId, WithdrawalRequest request);
         Task<Result<WalletDto>> TransferAsync(long userId, Guid walletId, TransferRequest request);
-        Task<Result> FreezWalletAsync(long userId, Guid walletId);
-        Task<Result> UnfreezWalletAsync(long userId, Guid walletId);
+        Task<Result<WalletStatusDto>> FreezWalletAsync(long userId, Guid walletId);
+        Task<Result<WalletStatusDto>> UnfreezWalletAsync(long userId, Guid walletId);
 
     }
 }

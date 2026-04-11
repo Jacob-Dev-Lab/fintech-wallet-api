@@ -24,7 +24,13 @@
 
                 context.Response.StatusCode = 500;
 
-                await context.Response.WriteAsync("An unexpected error occurred");
+                var response = new
+                {
+                    message = "An unexpected error occurred. Please try again later.",
+                    errors = new[] { ex.Message }
+                };
+
+                await context.Response.WriteAsJsonAsync(response);
             }
         }
     }

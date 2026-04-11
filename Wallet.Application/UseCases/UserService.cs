@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Wallet.Application.Common;
+using Wallet.Application.Common.Enum;
 using Wallet.Application.Dtos.Requests;
 using Wallet.Application.Dtos.Responses;
 using Wallet.Application.Interfaces;
@@ -40,7 +41,7 @@ namespace Wallet.Application.UseCases
                     request.Email);
 
                 return Result<UserDto>
-                    .Failure(new Error(ErrorType.BadRequest, "All fields are required"));
+                    .Failure(new Error(ErrorType.BadRequest, ["All fields are required"]));
             }
 
             if (!_emailValidator.IsValid(request.Email))
@@ -49,7 +50,7 @@ namespace Wallet.Application.UseCases
                     request.Email);
 
                 return Result<UserDto>
-                       .Failure(new Error(ErrorType.BadRequest, "Invalid email address."));
+                       .Failure(new Error(ErrorType.BadRequest, ["Invalid email address."]));
             }
 
             try
@@ -60,7 +61,7 @@ namespace Wallet.Application.UseCases
                         request.Email);
 
                     return Result<UserDto>
-                           .Failure(new Error(ErrorType.BadRequest, "Email address already exist."));
+                           .Failure(new Error(ErrorType.BadRequest, ["Email address already exist."]));
                 }
 
                 var passwordHash = _hasher.Hash(request.Password);
@@ -91,7 +92,7 @@ namespace Wallet.Application.UseCases
                 _logger.LogError(ex, "Domain error during user registration. Email={Email}", 
                     request.Email);
 
-                return Result<UserDto>.Failure(new Error(ErrorType.BadRequest, ex.Message));
+                return Result<UserDto>.Failure(new Error(ErrorType.BadRequest, [ex.Message]));
             }
         }
 
@@ -100,7 +101,7 @@ namespace Wallet.Application.UseCases
             var user = await _userRepository.FindByIdAsync(Id);
 
             if (user is null)
-                return Result<UserDto>.Failure(new Error(ErrorType.NotFound, "Wallet not found."));
+                return Result<UserDto>.Failure(new Error(ErrorType.NotFound, ["Wallet not found."]));
 
             return Result<UserDto>.Success(new UserDto
             {
@@ -136,7 +137,7 @@ namespace Wallet.Application.UseCases
                     request.Email);
 
                 return Result<UserLoginDto>
-                    .Failure(new Error(ErrorType.BadRequest, "Usrname/Password required"));
+                    .Failure(new Error(ErrorType.BadRequest, ["Usrname/Password required"]));
             }
 
             var email = request.Email.Trim().ToLowerInvariant();
@@ -149,7 +150,7 @@ namespace Wallet.Application.UseCases
                     request.Email);
 
                 return Result<UserLoginDto>
-                    .Failure(new Error(ErrorType.Unauthorized, "Incorrect Username/Password."));
+                    .Failure(new Error(ErrorType.Unauthorized, ["Incorrect Username/Password."]));
             }
 
             if (!_hasher.Verify(user.PasswordHash, request.Password))
@@ -158,7 +159,7 @@ namespace Wallet.Application.UseCases
                     request.Email);
 
                 return Result<UserLoginDto>
-                    .Failure(new Error(ErrorType.Unauthorized, "Incorrect Username/Password."));
+                    .Failure(new Error(ErrorType.Unauthorized, ["Incorrect Username/Password."]));
             }
 
             _logger.LogInformation("User login successful. UserId={UserId}, Email={Email}", 

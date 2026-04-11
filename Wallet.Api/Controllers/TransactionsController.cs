@@ -8,7 +8,7 @@ namespace Wallet.Api.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class TransactionsController : ControllerBase
+    public class TransactionsController : ApiControllerBase
     {
         private readonly ITransactionService _transactionService;
 
@@ -20,33 +20,13 @@ namespace Wallet.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetByUserId()
         {
-            var userClaim = User.FindFirstValue(ClaimTypes.Name);
-
-            if (!long.TryParse(userClaim, out long userId))
-                return Unauthorized(userId);
-
-            var result = await _transactionService.GetByUserIdAsync(userId);
-
-            if (!result.IsSuccess)
-                return StatusResponse.ToActionResult(result.Error!); ;
-
-            return Ok(result.Value);
+            return HandleResult(await _transactionService.GetByUserIdAsync(UserId));
         }
 
         [HttpGet("{walletId}")]
         public async Task<IActionResult> GetByWalletId(Guid walletId)
         {
-            var userClaim = User.FindFirstValue(ClaimTypes.Name);
-
-            if (!long.TryParse(userClaim, out long userId))
-                return Unauthorized(userId);
-
-            var result = await _transactionService.GetByWalletIdAsync(userId, walletId);
-
-            if (!result.IsSuccess)
-                return StatusResponse.ToActionResult(result.Error!);
-
-            return Ok(result.Value);
+            return HandleResult(await _transactionService.GetByWalletIdAsync(UserId, walletId));
         }
     }
 }

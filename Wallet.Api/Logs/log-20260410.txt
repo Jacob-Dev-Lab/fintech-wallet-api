@@ -9,3 +9,12 @@
 [09:41:08 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Account/register responded 400 in 4320.0578 ms
 [09:43:35 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Account/register responded 400 in 6085.0895 ms
 [09:51:13 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Account/register responded 400 in 2241.9472 ms
+[12:46:52 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Account/register responded 400 in 1700.9151 ms
+[12:47:24 Information] Wallet.Application.UseCases.UserService - User login attempt. Email=jacob@gmail.com
+[12:47:24 Information] Wallet.Infrastructure.Repository.UserRepository - Finding user by email: jacob@gmail.com
+[12:47:28 Warning] Wallet.Application.UseCases.UserService - User login failed due to incorrect password. Email=jacob@gmail.com
+[12:47:29 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Account/login responded 401 in 5093.7713 ms
+[13:00:14 Information] Wallet.Application.UseCases.UserService - User login attempt. Email=jacob@gmail.com
+[13:00:14 Information] Wallet.Infrastructure.Repository.UserRepository - Finding user by email: jacob@gmail.com
+[13:00:21 Warning] Wallet.Application.UseCases.UserService - User login failed due to incorrect password. Email=jacob@gmail.com
+[13:00:21 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Account/login responded 401 in 12266.9849 ms

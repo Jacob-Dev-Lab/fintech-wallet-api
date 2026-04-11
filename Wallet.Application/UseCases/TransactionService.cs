@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using Microsoft.EntityFrameworkCore;
 using Wallet.Application.Common;
+using Wallet.Application.Common.Enum;
 using Wallet.Application.Dtos.Responses;
 using Wallet.Application.Interfaces;
 
@@ -35,7 +36,7 @@ namespace Wallet.Application.UseCases
         {
             if (walletId == Guid.Empty)
                 return Result<IReadOnlyList<TransactionDto>>
-                    .Failure(new Error(ErrorType.BadRequest, "Invalid wallet id."));
+                    .Failure(new Error(ErrorType.BadRequest, ["Invalid wallet id."]));
 
             var transactions = await _transactionRepository.FindByUserId(userId)
                 .Where(t =>  t.WalletId == walletId)
