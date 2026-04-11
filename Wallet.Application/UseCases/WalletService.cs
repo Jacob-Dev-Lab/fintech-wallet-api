@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Wallet.Application.Common;
+using Wallet.Application.Common.Enum;
 using Wallet.Application.Dtos.Requests;
 using Wallet.Application.Dtos.Responses;
 using Wallet.Application.Interfaces;
@@ -57,7 +58,7 @@ namespace Wallet.Application.UseCases
                 _logger.LogError(ex, "Error creating wallet for user {UserId} with currency {Currency}: {ErrorMessage}", 
                     userId, currency, ex.Message);
 
-                return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, ex.Message));
+                return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, [ex.Message]));
             }
         }
 
@@ -78,12 +79,12 @@ namespace Wallet.Application.UseCases
         public async Task<Result<WalletDto>> GetByWalletIdAsync(long userId, Guid walletId)
         {
             if (walletId == Guid.Empty)
-                return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, "Invalid wallet id"));
+                return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, ["Invalid wallet id"]));
 
             var wallet = await _walletRepository.FindByWalletIdProjectionAsync(userId, walletId);
 
             if (wallet is null)
-                return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, "Wallet not found"));
+                return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, ["Wallet not found"]));
 
             var response = new WalletDto
             {
@@ -107,7 +108,7 @@ namespace Wallet.Application.UseCases
                     "UserId = {userId}, WalletId = {walletId}", 
                     userId, walletId);
 
-                return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, "Invalid wallet."));
+                return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, ["Invalid wallet."]));
             }
 
             if (request.Amount <= 0)
@@ -116,7 +117,7 @@ namespace Wallet.Application.UseCases
                     "UserId = {userId}, WalletId = {walletId}, Amount = {Amount}", 
                     userId, walletId, request.Amount);
 
-                return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, "Amount must be greater than zero."));
+                return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, ["Amount must be greater than zero."]));
             }
 
             var wallet = await _walletRepository.FindByWalletIdAsync(userId, walletId);
@@ -127,7 +128,7 @@ namespace Wallet.Application.UseCases
                     "UserId = {userId}, WalletId = {walletId}", 
                     userId, walletId);
 
-                return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, "Wallet not found"));
+                return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, ["Wallet not found"]));
             }
 
             try
@@ -164,7 +165,7 @@ namespace Wallet.Application.UseCases
                     userId, walletId);
 
                 return Result<WalletDto>.Failure(new Error(
-                    ErrorType.Conflict, "Error: Multiple update, Try again later."));
+                    ErrorType.Conflict, ["Error: Multiple update, Try again later."]));
             }
             catch (DomainException ex)
             {
@@ -172,7 +173,7 @@ namespace Wallet.Application.UseCases
                     "UserId={UserId}, WalletId={WalletId}, ErrorMessage={ErrorMessage}", 
                     userId, walletId, ex.Message);
 
-                return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, ex.Message));
+                return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, [ex.Message]));
             }
 
             var response = new WalletDto
@@ -197,7 +198,7 @@ namespace Wallet.Application.UseCases
                     "UserId = {userId}, WalletId = {walletId}",
                     userId, walletId);
 
-                return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, "Invalid wallet id"));
+                return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, ["Invalid wallet id"]));
             }
 
             if (request.Amount <= 0)
@@ -207,7 +208,7 @@ namespace Wallet.Application.UseCases
                     userId, walletId, request.Amount);
 
                 return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, 
-                    "Amount must be greater than zero."));
+                    ["Amount must be greater than zero."]));
             }
 
             var wallet = await _walletRepository.FindByWalletIdAsync(userId, walletId);
@@ -218,7 +219,7 @@ namespace Wallet.Application.UseCases
                     "UserId = {userId}, WalletId = {walletId}",
                     userId, walletId);
 
-                return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, "Wallet not found"));
+                return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, ["Wallet not found"]));
             }
 
             try
@@ -255,7 +256,7 @@ namespace Wallet.Application.UseCases
                     userId, walletId);
 
                 return Result<WalletDto>.Failure(new Error(
-                    ErrorType.Conflict, "Error: Multiple update, Try again later."));
+                    ErrorType.Conflict, ["Error: Multiple update, Try again later."]));
             }
             catch (DomainException ex)
             {
@@ -263,7 +264,7 @@ namespace Wallet.Application.UseCases
                    "UserId={UserId}, WalletId={WalletId}, ErrorMessage={ErrorMessage}",
                    userId, walletId, ex.Message);
 
-                return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, ex.Message));
+                return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, [ex.Message]));
             }
 
             var response = new WalletDto
@@ -288,7 +289,7 @@ namespace Wallet.Application.UseCases
                     "SenderWalletId={SenderWalletId}, ReceiverWalletId={ReceiverWalletId}",
                     userId, walletId, request.ReceivingWalletId);
 
-                return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, "Invalid wallet id."));
+                return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, ["Invalid wallet id."]));
             }
 
             if (request.Amount <= 0)
@@ -298,7 +299,7 @@ namespace Wallet.Application.UseCases
                     userId, walletId);
 
                 return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, 
-                    "Amount must be greater than zero."));
+                    ["Amount must be greater than zero."]));
             }
 
             if (walletId == request.ReceivingWalletId)
@@ -307,7 +308,7 @@ namespace Wallet.Application.UseCases
                     "WalletId={WalletId}", userId, walletId);
 
                 return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, 
-                    "Cannot transfer to self."));
+                    ["Cannot transfer to self."]));
             }
 
             var sender = await _walletRepository
@@ -323,7 +324,7 @@ namespace Wallet.Application.UseCases
                     userId, walletId, request.ReceivingWalletId);
 
                 return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, 
-                    "Either of the wallet is invalid"));
+                    ["Either of the wallet is invalid"]));
             }
 
             var senderWalletId = walletId;
@@ -376,7 +377,7 @@ namespace Wallet.Application.UseCases
                     userId, senderWalletId, receiverWalletId);
 
                 return Result<WalletDto>.Failure(new Error(
-                    ErrorType.Conflict, "Error: Multiple update, Try again later."));
+                    ErrorType.Conflict, ["Error: Multiple update, Try again later."]));
             }
             catch (DomainException ex)
             {
@@ -385,7 +386,7 @@ namespace Wallet.Application.UseCases
                     "ErrorMessage={ErrorMessage}",
                     userId, senderWalletId, receiverWalletId, ex.Message);
 
-                return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, ex.Message));
+                return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, [ex.Message]));
             }
 
             var response = new WalletDto
@@ -393,13 +394,12 @@ namespace Wallet.Application.UseCases
                 WalletId = senderWalletId,
                 Currency = sender.Currency.ToString(),
                 Balance = sender.Balance
-
             };
 
             return Result<WalletDto>.Success(response);
         }
 
-        public async Task<Result> FreezWalletAsync(long userId, Guid walletId)
+        public async Task<Result<WalletStatusDto>> FreezWalletAsync(long userId, Guid walletId)
         {
             _logger.LogInformation("Freeze wallet request received. UserId={UserId}, " +
                 "WalletId={WalletId}", userId, walletId);
@@ -409,7 +409,7 @@ namespace Wallet.Application.UseCases
                 _logger.LogWarning("Freeze wallet request failed due to invalid wallet id. " +
                     "UserId={UserId}, WalletId={WalletId}", userId, walletId);
 
-                return Result.Failure(new Error(ErrorType.BadRequest, "Invalid wallet id"));
+                return Result<WalletStatusDto>.Failure(new Error(ErrorType.BadRequest, ["Invalid wallet id"]));
             }
 
             var wallet = await _walletRepository.FindByWalletIdAsync(userId, walletId);
@@ -419,7 +419,7 @@ namespace Wallet.Application.UseCases
                 _logger.LogWarning("Freeze wallet request failed due to wallet not found. " +
                     "UserId={UserId}, WalletId={WalletId}", userId, walletId);
 
-                return Result.Failure(new Error(ErrorType.NotFound, "Wallet not found"));
+                return Result<WalletStatusDto>.Failure(new Error(ErrorType.NotFound, ["Wallet not found"]));
             }
 
             try
@@ -436,21 +436,27 @@ namespace Wallet.Application.UseCases
                 _logger.LogError("Concurrency error during wallet freeze. UserId={UserId}, " +
                     "WalletId={WalletId}", userId, walletId);
 
-                return Result.Failure(new Error(
-                    ErrorType.Conflict, "Error: Multiple update, Try again later."));
+                return Result<WalletStatusDto>.Failure(new Error(
+                    ErrorType.Conflict, ["Error: Multiple update, Try again later."]));
             }
             catch (DomainException ex)
             {
                 _logger.LogError(ex, "Domain error during wallet freeze. UserId={UserId}, " +
                     "WalletId={WalletId}, ErrorMessage={ErrorMessage}", userId, walletId, ex.Message);
 
-                return Result.Failure(new Error(ErrorType.BadRequest, ex.Message));
+                return Result<WalletStatusDto>.Failure(new Error(ErrorType.BadRequest, [ex.Message]));
             }
 
-            return Result.Success();
+            var response = new WalletStatusDto
+            {
+                WalletId = walletId,
+                Active = wallet.IsActive
+            };
+
+            return Result<WalletStatusDto>.Success(response);
         }
 
-        public async Task<Result> UnfreezWalletAsync(long userId, Guid walletId)
+        public async Task<Result<WalletStatusDto>> UnfreezWalletAsync(long userId, Guid walletId)
         {
             _logger.LogInformation("Unfreeze wallet request received. UserId={UserId}, " +
                 "WalletId={WalletId}", userId, walletId);
@@ -460,7 +466,7 @@ namespace Wallet.Application.UseCases
                 _logger.LogWarning("Unfreeze wallet request failed due to invalid wallet id. " +
                     "UserId={UserId}, WalletId={WalletId}", userId, walletId);
 
-                return Result.Failure(new Error(ErrorType.BadRequest, "Invalid wallet id"));
+                return Result<WalletStatusDto>.Failure(new Error(ErrorType.BadRequest, ["Invalid wallet id"]));
             }
 
             var wallet = await _walletRepository.FindByWalletIdAsync(userId, walletId);
@@ -470,7 +476,7 @@ namespace Wallet.Application.UseCases
                 _logger.LogWarning("Unfreeze wallet request failed due to wallet not found. " +
                     "UserId={UserId}, WalletId={WalletId}", userId, walletId);
 
-                return Result.Failure(new Error(ErrorType.NotFound, "Wallet not found"));
+                return Result<WalletStatusDto>.Failure(new Error(ErrorType.NotFound, ["Wallet not found"]));
             }
 
             try
@@ -487,18 +493,24 @@ namespace Wallet.Application.UseCases
                 _logger.LogError("Concurrency error during wallet unfreeze. UserId={UserId}, " +
                     "WalletId={WalletId}", userId, walletId);
 
-                return Result.Failure(new Error(
-                    ErrorType.Conflict, "Error: Multiple update, Try again later."));
+                return Result<WalletStatusDto>.Failure(new Error(
+                    ErrorType.Conflict, ["Error: Multiple update, Try again later."]));
             }
             catch (DomainException ex)
             {
                 _logger.LogError(ex, "Domain error during wallet unfreeze. UserId={UserId}, " +
                     "WalletId={WalletId}, ErrorMessage={ErrorMessage}", userId, walletId, ex.Message);
 
-                return Result.Failure(new Error(ErrorType.BadRequest, ex.Message));
+                return Result<WalletStatusDto>.Failure(new Error(ErrorType.BadRequest, [ex.Message]));
             }
 
-            return Result.Success();
+            var response = new WalletStatusDto
+            {
+                WalletId = walletId,
+                Active = wallet.IsActive
+            };
+
+            return Result<WalletStatusDto>.Success(response);
         }
     }
 }

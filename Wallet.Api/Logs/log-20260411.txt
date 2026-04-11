@@ -1,0 +1,65 @@
+[01:47:24 Information] Wallet.Application.UseCases.UserService - User registration attempt. Email=string
+[01:47:24 Warning] Wallet.Application.UseCases.UserService - User registration failed due to missing fields. Email=string
+[01:47:24 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Account/register responded 400 in 929.3581 ms
+[01:49:04 Information] Wallet.Application.UseCases.UserService - User registration attempt. Email=example@gmail.com
+[01:49:04 Information] Wallet.Infrastructure.Repository.UserRepository - Finding user by email: example@gmail.com
+[01:49:07 Warning] Wallet.Infrastructure.Repository.UserRepository - No user found for this email. Email=example@gmail.com
+[01:49:07 Information] Wallet.Infrastructure.Repository.UserRepository - Adding new user with email: example@gmail.com
+[01:49:07 Information] Wallet.Application.UseCases.UserService - User registration successful. UserId=13, Email=example@gmail.com
+[01:49:07 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Account/register responded 200 in 3219.8776 ms
+[01:52:18 Information] Wallet.Application.UseCases.UserService - User login attempt. Email=jacob@gmail.com
+[01:52:18 Information] Wallet.Infrastructure.Repository.UserRepository - Finding user by email: jacob@gmail.com
+[01:52:18 Warning] Wallet.Application.UseCases.UserService - User login failed due to incorrect password. Email=jacob@gmail.com
+[01:52:18 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Account/login responded 401 in 290.8909 ms
+[02:08:28 Information] Wallet.Application.UseCases.UserService - User registration attempt. Email=example@gmail.com
+[02:08:28 Information] Wallet.Infrastructure.Repository.UserRepository - Finding user by email: example@gmail.com
+[02:08:32 Warning] Wallet.Infrastructure.Repository.UserRepository - No user found for this email. Email=example@gmail.com
+[02:08:32 Information] Wallet.Infrastructure.Repository.UserRepository - Adding new user with email: example@gmail.com
+[02:08:33 Information] Wallet.Application.UseCases.UserService - User registration successful. UserId=14, Email=example@gmail.com
+[02:08:33 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Account/register responded 200 in 5579.4153 ms
+[13:12:25 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Account/register responded 400 in 967.2926 ms
+[13:17:06 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Account/register responded 400 in 660.4454 ms
+[13:20:04 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Account/register responded 400 in 662.1393 ms
+[13:23:34 Information] Wallet.Application.UseCases.UserService - User login attempt. Email=jacob@gmail.com
+[13:23:34 Information] Wallet.Infrastructure.Repository.UserRepository - Finding user by email: jacob@gmail.com
+[13:23:37 Warning] Wallet.Application.UseCases.UserService - User login failed due to incorrect password. Email=jacob@gmail.com
+[13:23:37 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Account/login responded 401 in 3466.4006 ms
+[14:07:04 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Account/register responded 400 in 615.2298 ms
+[14:07:18 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Account/register responded 400 in 100.5979 ms
+[14:08:03 Information] Wallet.Application.UseCases.UserService - User login attempt. Email=jacob@gmail.com
+[14:08:03 Information] Wallet.Infrastructure.Repository.UserRepository - Finding user by email: jacob@gmail.com
+[14:08:05 Information] Wallet.Application.UseCases.UserService - User login successful. UserId=1, Email=jacob@gmail.com
+[14:08:05 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Account/login responded 200 in 2658.6633 ms
+[14:09:12 Information] Wallet.Infrastructure.Repository.TransactionRepository - Fetching transactions for user ID 1
+[14:09:12 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP GET /api/Transactions responded 200 in 378.1712 ms
+[14:10:09 Information] Wallet.Infrastructure.Repository.TransactionRepository - Fetching transactions for user ID 1
+[14:10:09 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP GET /api/Transactions/BE4E97AF-E94E-47E9-8FA9-A363F8DA4A05 responded 200 in 250.4439 ms
+[14:10:40 Information] Wallet.Infrastructure.Repository.TransactionRepository - Fetching transactions for user ID 1
+[14:10:40 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP GET /api/Transactions/E880FE69-7FAB-4654-B360-DC6285C61AA0 responded 200 in 80.1540 ms
+[14:12:14 Information] Wallet.Application.UseCases.UserService - User login attempt. Email=femi@gmail.com
+[14:12:14 Information] Wallet.Infrastructure.Repository.UserRepository - Finding user by email: femi@gmail.com
+[14:12:14 Warning] Wallet.Infrastructure.Repository.UserRepository - No user found for this email. Email=femi@gmail.com
+[14:12:14 Warning] Wallet.Application.UseCases.UserService - User login failed due to incorrect email. Email=femi@gmail.com
+[14:12:14 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Account/login responded 401 in 52.8487 ms
+[14:12:31 Information] Wallet.Application.UseCases.UserService - User login attempt. Email=daniels@gmail.com
+[14:12:31 Information] Wallet.Infrastructure.Repository.UserRepository - Finding user by email: daniels@gmail.com
+[14:12:32 Information] Wallet.Application.UseCases.UserService - User login successful. UserId=2, Email=daniels@gmail.com
+[14:12:32 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Account/login responded 200 in 172.3733 ms
+[14:13:00 Information] Wallet.Infrastructure.Repository.TransactionRepository - Fetching transactions for user ID 2
+[14:13:00 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP GET /api/Transactions/E880FE69-7FAB-4654-B360-DC6285C61AA0 responded 200 in 64.6994 ms
+[14:14:03 Information] Wallet.Infrastructure.Repository.WalletRepository - Fetching wallets by user ID. UserId=2
+[14:14:03 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP GET /api/Wallets responded 200 in 122.7196 ms
+[14:14:27 Information] Wallet.Infrastructure.Repository.WalletRepository - Fetching wallet projection. UserId=2, WalletId="e880fe69-7fab-4654-b360-dc6285c61aa0"
+[14:14:27 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP GET /api/Wallets/e880fe69-7fab-4654-b360-dc6285c61aa0 responded 200 in 51.0769 ms
+[14:15:12 Information] Wallet.Application.UseCases.WalletService - Withdrawal request recieved. UserId = 2, WalletId = "e880fe69-7fab-4654-b360-dc6285c61aa0", Amount = 20
+[14:15:12 Information] Wallet.Infrastructure.Repository.WalletRepository - Fetching tracked wallet. UserId=2, WalletId="e880fe69-7fab-4654-b360-dc6285c61aa0"
+[14:15:12 Information] Wallet.Infrastructure.Repository.WalletRepository - Updating wallet. WalletId="e880fe69-7fab-4654-b360-dc6285c61aa0", UserId=2
+[14:15:12 Information] Wallet.Infrastructure.Repository.TransactionRepository - Adding transaction with ID "ad2e06e6-0e4a-4e9b-ba52-0d0822cae185" for wallet "e880fe69-7fab-4654-b360-dc6285c61aa0"
+[14:15:12 Information] Wallet.Application.UseCases.WalletService - Withdrawal transaction created. UserId=2, WalletId="e880fe69-7fab-4654-b360-dc6285c61aa0", TransactionId="ad2e06e6-0e4a-4e9b-ba52-0d0822cae185"
+[14:15:13 Information] Wallet.Application.UseCases.WalletService - Withdrawal completed successfully. UserId=2, WalletId="e880fe69-7fab-4654-b360-dc6285c61aa0"
+[14:15:13 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Wallets/e880fe69-7fab-4654-b360-dc6285c61aa0/withdraw responded 200 in 771.1251 ms
+[14:15:55 Information] Wallet.Application.UseCases.WalletService - Freeze wallet request received. UserId=2, WalletId="e880fe69-7fab-4654-b360-dc6285c61aa0"
+[14:15:55 Information] Wallet.Infrastructure.Repository.WalletRepository - Fetching tracked wallet. UserId=2, WalletId="e880fe69-7fab-4654-b360-dc6285c61aa0"
+[14:15:55 Information] Wallet.Infrastructure.Repository.WalletRepository - Updating wallet. WalletId="e880fe69-7fab-4654-b360-dc6285c61aa0", UserId=2
+[14:15:55 Information] Wallet.Application.UseCases.WalletService - Wallet frozen successfully. UserId=2, WalletId="e880fe69-7fab-4654-b360-dc6285c61aa0"
+[14:15:55 Information] Serilog.AspNetCore.RequestLoggingMiddleware - HTTP POST /api/Wallets/e880fe69-7fab-4654-b360-dc6285c61aa0/freeze responded 200 in 94.2128 ms

@@ -1,7 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Wallet.Api.Common;
@@ -12,7 +11,7 @@ namespace Wallet.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AccountController : ControllerBase
+    public class AccountController : ApiControllerBase
     { 
         private readonly IUserService _userService;
 
@@ -22,40 +21,23 @@ namespace Wallet.Api.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> RegisterAsync([FromBody] CreateUserRequest request,
-            IValidator<CreateUserRequest> validator)
+        public async Task<IActionResult> RegisterAsync([FromBody] CreateUserRequest request)
         {
-            var validationResult = await validator.ValidateAsync(request);
-
-            if (!validationResult.IsValid)
-                return BadRequest(validationResult.ToErrorResponse());
-
-            var result = await _userService.CreateAsync(request);
-
-            if (!result.IsSuccess)
-                return StatusResponse.ToActionResult(result.Error!);
-
-            return CreatedAtAction(nameof(RegisterAsync), new { id = result.Value!.Id }, result.Value);
+            return HandleResult(await _userService.CreateAsync(request));
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> LoginAsync([FromBody] UserLoginRequest request,
-            IValidator<UserLoginRequest> validator)
+        public async Task<IActionResult> LoginAsync([FromBody] UserLoginRequest request)
         {
-            var validationResult = await validator.ValidateAsync(request);
-
-            if (!validationResult.IsValid)
-                return BadRequest(validationResult.ToErrorResponse());
-
             var result = await _userService.LoginAsync(request);
 
             if (!result.IsSuccess)
-                return StatusResponse.ToActionResult(result.Error!);
+                return ApiRequestResponse.ToActionResult(result);
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, result.Value!.UserId.ToString()),
-                new Claim(ClaimTypes.Name, result.Value.Email)
+                new Claim(ClaimTypes.Name, result!.Value!.UserId.ToString()),
+                new Claim(ClaimTypes.Email, result.Value.Email)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("HereIsMyJwtToken_A_Special_12345"));
@@ -69,7 +51,7 @@ namespace Wallet.Api.Controllers
 
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
-            return Ok(new { token = jwt });
+            return Ok(ApiResult<object>.Ok(new { token = jwt }));
         }
     }
 }

@@ -8,7 +8,7 @@ namespace Wallet.Api.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class UsersController : ControllerBase
+    public class UsersController : ApiControllerBase
     {
         private readonly IUserService _userService;
 
@@ -20,28 +20,13 @@ namespace Wallet.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllAsync()
         {
-            var result = await _userService.GetAllAsync();
-
-            if (!result.IsSuccess)
-                return StatusResponse.ToActionResult(result.Error!);
-
-            return Ok(result.Value);
+            return HandleResult(await _userService.GetAllAsync());
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserAsync()
         {
-            var userClaim = User.FindFirstValue(ClaimTypes.Name);
-
-            if (!long.TryParse(userClaim, out long userId))
-                return Unauthorized(userId);
-
-            var result = await _userService.GetByIdAsync(userId);
-
-            if (!result.IsSuccess)
-                return StatusResponse.ToActionResult(result.Error!);
-
-            return Ok(result.Value);
+            return HandleResult(await _userService.GetByIdAsync(UserId));
         }
     }
 }

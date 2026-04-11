@@ -1,8 +1,6 @@
-﻿using System.Security.Claims;
-using FluentValidation;
+﻿using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Wallet.Api.Common;
 using Wallet.Application.Dtos.Requests;
 using Wallet.Application.Interfaces;
 
@@ -11,7 +9,7 @@ namespace Wallet.Api.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class WalletsController : ControllerBase
+    public class WalletsController : ApiControllerBase
     {
         private readonly IWalletService _service;
 
@@ -23,149 +21,53 @@ namespace Wallet.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var userClaim = User.FindFirstValue(ClaimTypes.Name);
-
-            if (!long.TryParse(userClaim, out long userId))
-                return Unauthorized(new { message = "Invalid or missing authentication token." });
-
-            var result = await _service.GetByUserIdAsync(userId);
-
-            if (!result.IsSuccess)
-                return StatusResponse.ToActionResult(result.Error!);
-
-            return Ok(result.Value);
+            return HandleResult(await _service.GetByUserIdAsync(UserId));
         }
 
         [HttpGet("{walletId}")]
         public async Task<IActionResult> GetById(Guid walletId)
         {
-            var userClaim = User.FindFirstValue(ClaimTypes.Name);
-
-            if (!long.TryParse(userClaim, out long userId))
-                return Unauthorized(new { message = "Invalid or missing authentication token." });
-
-            var result = await _service.GetByWalletIdAsync(userId, walletId);
-
-            if (!result.IsSuccess)
-                return StatusResponse.ToActionResult(result.Error!);
-
-            return Ok(result.Value);
+            return HandleResult(await _service.GetByWalletIdAsync(UserId, walletId));
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateWalletRequest request)
         {
-            var userClaim = User.FindFirstValue(ClaimTypes.Name);
-
-            if (!long.TryParse(userClaim, out long userId))
-                return Unauthorized(new { message = "Invalid or missing authentication token." });
-
-            var result = await _service.CreateAsync(userId, request.Currency);
-
-            if (!result.IsSuccess || result.Value is null)
-                return StatusResponse.ToActionResult(result.Error!);
-
-            var wallet = result.Value;
-
-            return Created($"api/wallets/{wallet.WalletId}", wallet);
+            var result = await _service.CreateAsync(UserId, request.Currency);
+            return HandleCreatedResult(result, $"api/wallets/{result.Value!.WalletId}");
         }
 
         [HttpPost("{walletId}/freeze")]
         public async Task<IActionResult> Freeze(Guid walletId)
         {
-            var userClaim = User.FindFirstValue(ClaimTypes.Name);
-
-            if (!long.TryParse(userClaim, out long userId))
-                return Unauthorized(new { message = "Invalid or missing authentication token." });
-
-            var result = await _service.FreezWalletAsync(userId, walletId);
-
-            if (!result.IsSuccess)
-                return StatusResponse.ToActionResult(result.Error!);
-
-            return Ok(new {message = "Wallet frozen successfuly."});
+            return HandleResult(await _service.FreezWalletAsync(UserId, walletId));
         }
 
         [HttpPost("{walletId}/unfreeze")]
         public async Task<IActionResult> Unfreeze(Guid walletId)
         {
-            var userClaim = User.FindFirstValue(ClaimTypes.Name);
-
-            if (!long.TryParse(userClaim, out long userId))
-                return Unauthorized(new { message = "Invalid or missing authentication token." });
-
-            var result = await _service.UnfreezWalletAsync(userId, walletId);
-
-            if (!result.IsSuccess)
-                return StatusResponse.ToActionResult(result.Error!);
-
-            return Ok(new { message = "Wallet unfrozen successfuly." });
+            return HandleResult(await _service.UnfreezWalletAsync(UserId, walletId));
         }
 
         [HttpPost("{walletId}/deposit")]
         public async Task<IActionResult> Deposit(Guid walletId, [FromBody] DepositRequest request,
             IValidator<DepositRequest> validator)
         {
-            var validatorResult = validator.Validate(request);
-
-            if (!validatorResult.IsValid)
-                return BadRequest(validatorResult.ToErrorResponse());
-
-            var userClaim = User.FindFirstValue(ClaimTypes.Name);
-
-            if (!long.TryParse(userClaim, out long userId))
-                return Unauthorized(new { message = "Invalid or missing authentication token." });
-
-            var result = await _service.DepositAsync(userId, walletId, request);
-
-            if (!result.IsSuccess || result.Value is null)
-                return StatusResponse.ToActionResult(result.Error!);
-
-            return Ok(result.Value);
+            return HandleResult(await _service.DepositAsync(UserId, walletId, request));
         }
 
         [HttpPost("{walletId}/withdraw")]
         public async Task<IActionResult> Withdraw(Guid walletId, [FromBody] WithdrawalRequest request,
             IValidator<WithdrawalRequest> validator)
         {
-            var validatorResult = validator.Validate(request);
-
-            if (!validatorResult.IsValid)
-                return BadRequest(validatorResult.ToErrorResponse());
-
-            var userClaim = User.FindFirstValue(ClaimTypes.Name);
-
-            if (!long.TryParse(userClaim, out long userId))
-                return Unauthorized(new { message = "Invalid or missing authentication token." });
-
-            var result = await _service.WithdrawAsync(userId, walletId, request);
-
-            if (!result.IsSuccess || result.Value is null)
-                return StatusResponse.ToActionResult(result.Error!);
-
-            return Ok(result.Value);
+            return HandleResult(await _service.WithdrawAsync(UserId, walletId, request));
         }
 
         [HttpPost("{walletId}/transfer")]
         public async Task<IActionResult> Transfer(Guid walletId, [FromBody] TransferRequest request,
             [FromServices] IValidator<TransferRequest> validator)
         {
-            var validatorResult = validator.Validate(request);
-
-            if (!validatorResult.IsValid)
-                return BadRequest(validatorResult.ToErrorResponse());
-
-            var userClaim = User.FindFirstValue(ClaimTypes.Name);
-
-            if (!long.TryParse(userClaim, out long userId))
-                return Unauthorized(new { message = "Invalid or missing authentication token." });
-
-            var result = await _service.TransferAsync(userId, walletId, request);
-
-            if (!result.IsSuccess)
-                return StatusResponse.ToActionResult(result.Error!);
-
-            return Ok(result.Value);
+            return HandleResult(await _service.TransferAsync(UserId, walletId, request));
         }
     }
 }
