@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Wallet.Application.Dtos.Responses;
 using Wallet.Application.Interfaces;
 using Wallet.Domain.Entities;
 using Wallet.Infrastructure.Data;
@@ -73,7 +74,7 @@ namespace Wallet.Infrastructure.Repository
         // READ-ONLY QUERIES (no tracking)
         // ---------------------------------------------------------
 
-        public async Task<WalletAccount?> FindByWalletIdProjectionAsync(long userId, Guid walletId)
+        public async Task<WalletDto?> FindByWalletIdProjectionAsync(long userId, Guid walletId)
         {
             _logger.LogInformation(
                "Fetching wallet projection. UserId={UserId}, WalletId={WalletId}",
@@ -82,31 +83,29 @@ namespace Wallet.Infrastructure.Repository
             var wallet = await _dbContext.Wallets
                 .AsNoTracking()
                 .Where(w => w.UserId == userId && w.WalletId == walletId)
-                .Select(w => new WalletAccount
-                (
-                    w.WalletId,
-                    w.Currency,
-                    w.Balance
-                ))
+                .Select(WalletDto.Projection)
                 .FirstOrDefaultAsync();
 
             if (wallet is null)
                 _logger.LogWarning(
-                    "Wallet projection not found. UserId={UserId}, WalletId={WalletId}",
+                    "Wallet not found. UserId={UserId}, WalletId={WalletId}",
                     userId, walletId);
 
             return wallet;
         }
 
-        public IQueryable<WalletAccount> FindByUserId(long userId)
+        public async Task<IReadOnlyList<WalletDto>> FindByUserIdAsync(long userId)
         {
             _logger.LogInformation(
                "Fetching wallets by user ID. UserId={UserId}",
                userId);
 
-            return _dbContext.Wallets
+            return await _dbContext.Wallets
                 .AsNoTracking()
-                .Where(w => w.UserId == userId);
+                .Where(w => w.UserId == userId)
+                .OrderBy(w => w.CreatedAt)
+                .Select(WalletDto.Projection)
+                .ToListAsync();
         }
 
         // ---------------------------------------------------------

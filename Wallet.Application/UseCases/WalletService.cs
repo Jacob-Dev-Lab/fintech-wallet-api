@@ -65,13 +65,7 @@ namespace Wallet.Application.UseCases
         public async Task<Result<IReadOnlyList<WalletDto>>> GetByUserIdAsync(long userId)
         {
             var wallets = await _walletRepository
-                .FindByUserId(userId)
-                .Select(w => new WalletDto
-                {
-                    WalletId = w.WalletId,
-                    Currency = w.Currency.ToString(),
-                    Balance = w.Balance
-                }).ToListAsync();
+                .FindByUserIdAsync(userId);
 
             return Result<IReadOnlyList<WalletDto>>.Success(wallets);
         }
@@ -86,14 +80,7 @@ namespace Wallet.Application.UseCases
             if (wallet is null)
                 return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, ["Wallet not found"]));
 
-            var response = new WalletDto
-            {
-                WalletId = wallet.WalletId,
-                Balance = wallet.Balance,
-                Currency = wallet.Currency.ToString()
-            };
-
-            return Result<WalletDto>.Success(response);
+            return Result<WalletDto>.Success(wallet);
         }
 
         public async Task<Result<WalletDto>> DepositAsync(long userId, Guid walletId, DepositRequest request)

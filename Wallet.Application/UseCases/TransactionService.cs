@@ -16,20 +16,14 @@ namespace Wallet.Application.UseCases
             _transactionRepository = transactionRepository;
         }
 
-        public async Task<Result<IReadOnlyList<TransactionDto>>> GetByUserIdAsync(long userId)
+        public async Task<Result<TransactionDto?>> GetByTransactionIdAsync(long userId, Guid transactionId)
         {
-            var transactions = await _transactionRepository.FindByUserId(userId)
-                .Select(t => new TransactionDto
-                {
-                    DateCreated = t.CreatedAt,
-                    Transaction = t.Type.ToString(),
-                    Amount = t.Amount,
-                    Description = t.Description,
-                    Balance = t.Balance
-                })
-                .ToListAsync();
+            var transaction = await _transactionRepository.FindByIdAsync(userId, transactionId);
 
-            return Result<IReadOnlyList<TransactionDto>>.Success(transactions);
+            if (transaction is null)
+                return Result<TransactionDto?>.Failure(new Error(ErrorType.NotFound, ["Transaction not found."]));
+
+            return Result<TransactionDto?>.Success(transaction);
         }
 
         public async Task<Result<IReadOnlyList<TransactionDto>>> GetByWalletIdAsync(long userId, Guid walletId)
@@ -38,17 +32,14 @@ namespace Wallet.Application.UseCases
                 return Result<IReadOnlyList<TransactionDto>>
                     .Failure(new Error(ErrorType.BadRequest, ["Invalid wallet id."]));
 
-            var transactions = await _transactionRepository.FindByUserId(userId)
-                .Where(t =>  t.WalletId == walletId)
-                .Select(t => new TransactionDto
-                {
-                    DateCreated = t.CreatedAt,
-                    Transaction = t.Type.ToString(),
-                    Amount = t.Amount,
-                    Description = t.Description,
-                    Balance = t.Balance
-                })
-                .ToListAsync();
+            var transactions = await _transactionRepository.FindByWalletIdAsync(userId, walletId);
+
+            return Result<IReadOnlyList<TransactionDto>>.Success(transactions);
+        }
+
+        public async Task<Result<IReadOnlyList<TransactionDto>>> GetByUserIdAsync(long userId)
+        {
+            var transactions = await _transactionRepository.FindByUserIdAsync(userId);
 
             return Result<IReadOnlyList<TransactionDto>>.Success(transactions);
         }

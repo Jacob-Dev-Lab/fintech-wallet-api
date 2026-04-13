@@ -103,26 +103,13 @@ namespace Wallet.Application.UseCases
             if (user is null)
                 return Result<UserDto>.Failure(new Error(ErrorType.NotFound, ["Wallet not found."]));
 
-            return Result<UserDto>.Success(new UserDto
-            {
-                Id = user.Id,
-                Name = user.Name,
-                Email = user.Email,
-                DeactivatedAt = user.DeactivatedAt
-            });
+            return Result<UserDto>.Success(user);
         }
 
         public async Task<Result<IReadOnlyList<UserDto>>> GetAllAsync()
         {
             var users = await _userRepository
-                .FindAll()
-                .Select(u => new UserDto
-                {
-                    Id = u.Id,
-                    Name = u.Name,
-                    Email = u.Email
-                })
-                .ToListAsync();
+                .FindAllAsync();
 
             return Result<IReadOnlyList<UserDto>>.Success(users);
         }
@@ -153,7 +140,7 @@ namespace Wallet.Application.UseCases
                     .Failure(new Error(ErrorType.Unauthorized, ["Incorrect Username/Password."]));
             }
 
-            if (!_hasher.Verify(user.PasswordHash, request.Password))
+            if (!_hasher.Verify(user.Hash, request.Password))
             {
                 _logger.LogWarning("User login failed due to incorrect password. Email={Email}", 
                     request.Email);
@@ -168,7 +155,7 @@ namespace Wallet.Application.UseCases
             return Result<UserLoginDto>
                     .Success(new UserLoginDto 
                     { 
-                        UserId = user.Id, 
+                        Id = user.Id, 
                         Email = user.Email 
                     });
         }

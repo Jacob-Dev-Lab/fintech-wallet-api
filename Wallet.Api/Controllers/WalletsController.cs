@@ -1,5 +1,4 @@
-﻿using FluentValidation;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Wallet.Application.Dtos.Requests;
 using Wallet.Application.Interfaces;
@@ -24,7 +23,7 @@ namespace Wallet.Api.Controllers
             return HandleResult(await _service.GetByUserIdAsync(UserId));
         }
 
-        [HttpGet("{walletId}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid walletId)
         {
             return HandleResult(await _service.GetByWalletIdAsync(UserId, walletId));
@@ -50,22 +49,19 @@ namespace Wallet.Api.Controllers
         }
 
         [HttpPost("{walletId}/deposit")]
-        public async Task<IActionResult> Deposit(Guid walletId, [FromBody] DepositRequest request,
-            IValidator<DepositRequest> validator)
+        public async Task<IActionResult> Deposit(Guid walletId, [FromBody] DepositRequest request)
         {
             return HandleResult(await _service.DepositAsync(UserId, walletId, request));
         }
 
         [HttpPost("{walletId}/withdraw")]
-        public async Task<IActionResult> Withdraw(Guid walletId, [FromBody] WithdrawalRequest request,
-            IValidator<WithdrawalRequest> validator)
+        public async Task<IActionResult> Withdraw(Guid walletId, [FromBody] WithdrawalRequest request)
         {
             return HandleResult(await _service.WithdrawAsync(UserId, walletId, request));
         }
 
         [HttpPost("{walletId}/transfer")]
-        public async Task<IActionResult> Transfer(Guid walletId, [FromBody] TransferRequest request,
-            [FromServices] IValidator<TransferRequest> validator)
+        public async Task<IActionResult> Transfer(Guid walletId, [FromBody] TransferRequest request)
         {
             return HandleResult(await _service.TransferAsync(UserId, walletId, request));
         }
