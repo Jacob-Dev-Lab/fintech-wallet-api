@@ -24,9 +24,9 @@ namespace Wallet.Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid walletId)
+        public async Task<IActionResult> GetById(Guid id)
         {
-            return HandleResult(await _service.GetByWalletIdAsync(UserId, walletId));
+            return HandleResult(await _service.GetByWalletIdAsync(UserId, id));
         }
 
         [HttpPost]
@@ -36,34 +36,34 @@ namespace Wallet.Api.Controllers
             return HandleCreatedResult(result, $"api/wallets/{result.Value!.WalletId}");
         }
 
-        [HttpPost("{walletId}/freeze")]
-        public async Task<IActionResult> Freeze(Guid walletId)
+        [HttpPost("{id}/freeze")]
+        public async Task<IActionResult> Freeze(Guid id)
         {
-            return HandleResult(await _service.FreezWalletAsync(UserId, walletId));
+            return HandleResult(await _service.FreezeWalletAsync(UserId, id));
         }
 
-        [HttpPost("{walletId}/unfreeze")]
-        public async Task<IActionResult> Unfreeze(Guid walletId)
+        [HttpPost("{id}/unfreeze")]
+        public async Task<IActionResult> Unfreeze(Guid id)
         {
-            return HandleResult(await _service.UnfreezWalletAsync(UserId, walletId));
+            return HandleResult(await _service.UnfreezeWalletAsync(UserId, id));
         }
 
-        [HttpPost("{walletId}/deposit")]
-        public async Task<IActionResult> Deposit(Guid walletId, [FromBody] DepositRequest request)
+        [HttpPost("{id}/deposit")]
+        public async Task<IActionResult> Deposit(Guid id, [FromBody] DepositRequest request)
         {
-            return HandleResult(await _service.DepositAsync(UserId, walletId, request));
+            return HandleResult(await _service.DepositAsync(UserId, id, request));
         }
 
-        [HttpPost("{walletId}/withdraw")]
-        public async Task<IActionResult> Withdraw(Guid walletId, [FromBody] WithdrawalRequest request)
+        [HttpPost("{id}/withdraw")]
+        public async Task<IActionResult> Withdraw(Guid id, [FromBody] WithdrawRequest request)
         {
-            return HandleResult(await _service.WithdrawAsync(UserId, walletId, request));
+            return HandleResult(await _service.WithdrawAsync(UserId, id, request));
         }
 
-        [HttpPost("{walletId}/transfer")]
-        public async Task<IActionResult> Transfer(Guid walletId, [FromBody] TransferRequest request)
+        [HttpPost("transfer")]
+        public async Task<IActionResult> Transfer([FromBody] TransferRequest request)
         {
-            return HandleResult(await _service.TransferAsync(UserId, walletId, request));
+            return HandleResult(await _service.TransferAsync(UserId, request));
         }
     }
 }

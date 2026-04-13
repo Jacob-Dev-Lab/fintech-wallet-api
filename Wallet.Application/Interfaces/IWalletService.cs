@@ -10,10 +10,10 @@ namespace Wallet.Application.Interfaces
         Task<Result<IReadOnlyList<WalletDto>>> GetByUserIdAsync(long userId);
         Task<Result<WalletDto>> GetByWalletIdAsync(long userId, Guid walletId);
         Task<Result<WalletDto>> DepositAsync(long userId, Guid walletId, DepositRequest request);
-        Task<Result<WalletDto>> WithdrawAsync(long userId, Guid walletId, WithdrawalRequest request);
-        Task<Result<WalletDto>> TransferAsync(long userId, Guid walletId, TransferRequest request);
-        Task<Result<WalletStatusDto>> FreezWalletAsync(long userId, Guid walletId);
-        Task<Result<WalletStatusDto>> UnfreezWalletAsync(long userId, Guid walletId);
+        Task<Result<WalletDto>> WithdrawAsync(long userId, Guid walletId, WithdrawRequest request);
+        Task<Result<WalletDto>> TransferAsync(long userId, TransferRequest request);
+        Task<Result<WalletStatusDto>> FreezeWalletAsync(long userId, Guid walletId);
+        Task<Result<WalletStatusDto>> UnfreezeWalletAsync(long userId, Guid walletId);
 
     }
 }

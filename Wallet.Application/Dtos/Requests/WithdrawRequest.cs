@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Wallet.Application.Dtos.Requests
 {
-    public class WithdrawalRequest
+    public class WithdrawRequest
     {
         public decimal Amount { get; set; }
         public string Description { get; set; } = string.Empty;

@@ -173,7 +173,7 @@ namespace Wallet.Application.UseCases
             return Result<WalletDto>.Success(response);
         }
 
-        public async Task<Result<WalletDto>> WithdrawAsync(long userId, Guid walletId, WithdrawalRequest request)
+        public async Task<Result<WalletDto>> WithdrawAsync(long userId, Guid walletId, WithdrawRequest request)
         {
             _logger.LogInformation("Withdrawal request recieved. " +
                 "UserId = {userId}, WalletId = {walletId}, Amount = {Amount}",
@@ -264,18 +264,17 @@ namespace Wallet.Application.UseCases
             return Result<WalletDto>.Success(response);
         }
 
-        public async Task<Result<WalletDto>> TransferAsync(long userId, Guid walletId, TransferRequest request)
+        public async Task<Result<WalletDto>> TransferAsync(long userId, TransferRequest request)
         {
             _logger.LogInformation("Transfer request received. UserId={UserId}, " +
                 "SenderWalletId={SenderWalletId}, ReceiverWalletId={ReceiverWalletId}",
-                userId, walletId, request.ReceivingWalletId);
+                userId, request.SendingWalletId, request.ReceivingWalletId);
 
-            if (walletId == Guid.Empty || request.ReceivingWalletId == Guid.Empty)
+            if (request.SendingWalletId == Guid.Empty || request.ReceivingWalletId == Guid.Empty)
             {
                 _logger.LogWarning("Transfer failed: Invalid wallet ID. UserId={UserId}, " +
                     "SenderWalletId={SenderWalletId}, ReceiverWalletId={ReceiverWalletId}",
-                    userId, walletId, request.ReceivingWalletId);
-
+                    userId, request.SendingWalletId, request.ReceivingWalletId);
                 return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, ["Invalid wallet id."]));
             }
 
@@ -283,23 +282,23 @@ namespace Wallet.Application.UseCases
             {
                 _logger.LogWarning("Transfer failed: Invalid amount. UserId={UserId}," +
                     " SenderWalletId={SenderWalletId}",
-                    userId, walletId);
+                    userId, request.SendingWalletId);
 
                 return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, 
                     ["Amount must be greater than zero."]));
             }
 
-            if (walletId == request.ReceivingWalletId)
+            if (request.SendingWalletId == request.ReceivingWalletId)
             {
                 _logger.LogWarning("Transfer failed: Attempt to transfer to self. UserId={UserId}, " +
-                    "WalletId={WalletId}", userId, walletId);
+                    "WalletId={WalletId}", userId, request.SendingWalletId);
 
                 return Result<WalletDto>.Failure(new Error(ErrorType.BadRequest, 
                     ["Cannot transfer to self."]));
             }
 
             var sender = await _walletRepository
-                .FindByWalletIdAsync(userId, walletId);
+                .FindByWalletIdAsync(userId, request.SendingWalletId);
 
             var receiver = await _walletRepository
                 .FindByWalletIdAsync(request.ReceivingWalletId);
@@ -308,13 +307,13 @@ namespace Wallet.Application.UseCases
             {
                 _logger.LogWarning("Transfer failed: Wallet not found. UserId={UserId}, " +
                     "SenderWalletId={SenderWalletId}, ReceiverWalletId={ReceiverWalletId}",
-                    userId, walletId, request.ReceivingWalletId);
+                    userId, request.SendingWalletId, request.ReceivingWalletId);
 
                 return Result<WalletDto>.Failure(new Error(ErrorType.NotFound, 
                     ["Either of the wallet is invalid"]));
             }
 
-            var senderWalletId = walletId;
+            var senderWalletId = request.SendingWalletId;
             var receiverWalletId = request.ReceivingWalletId;
 
             try
@@ -325,7 +324,7 @@ namespace Wallet.Application.UseCases
 
                     var senderTransaction = Transaction.CreateTransferOut(
                         sender.UserId,
-                        walletId,
+                        senderWalletId,
                         request.Amount,
                         sender.Balance,
                         receiverWalletId,
@@ -386,7 +385,7 @@ namespace Wallet.Application.UseCases
             return Result<WalletDto>.Success(response);
         }
 
-        public async Task<Result<WalletStatusDto>> FreezWalletAsync(long userId, Guid walletId)
+        public async Task<Result<WalletStatusDto>> FreezeWalletAsync(long userId, Guid walletId)
         {
             _logger.LogInformation("Freeze wallet request received. UserId={UserId}, " +
                 "WalletId={WalletId}", userId, walletId);
@@ -443,7 +442,7 @@ namespace Wallet.Application.UseCases
             return Result<WalletStatusDto>.Success(response);
         }
 
-        public async Task<Result<WalletStatusDto>> UnfreezWalletAsync(long userId, Guid walletId)
+        public async Task<Result<WalletStatusDto>> UnfreezeWalletAsync(long userId, Guid walletId)
         {
             _logger.LogInformation("Unfreeze wallet request received. UserId={UserId}, " +
                 "WalletId={WalletId}", userId, walletId);
