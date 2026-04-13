@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Wallet.Application.Dtos.Responses;
 using Wallet.Application.Interfaces;
 using Wallet.Domain.Entities;
 using Wallet.Infrastructure.Data;
@@ -32,7 +33,7 @@ namespace Wallet.Infrastructure.Repository
         // ---------------------------------------------------------
         // TRACKED QUERIES (for updates)
         // ---------------------------------------------------------
-        public async Task<User?> FindByIdAsync(long Id)
+        public async Task<User?> FindByIdForUpdateAsync(long Id)
         {
             _logger.LogInformation("Finding user by ID: {Id}", Id);
 
@@ -47,21 +48,41 @@ namespace Wallet.Infrastructure.Repository
         // ---------------------------------------------------------
         // READ-ONLY QUERIES (no tracking)
         // ---------------------------------------------------------
-        public IQueryable<User> FindAll()
+        public async Task<UserDto?> FindByIdAsync(long Id)
+        {
+            _logger.LogInformation("Finding user by ID: {Id}", Id);
+
+            var user = await _dbContext.Users
+                .AsNoTracking()
+                .Where(u => u.Id == Id)
+                .Select(UserDto.Projection)
+                .FirstOrDefaultAsync();
+
+            if (user is null)
+                _logger.LogWarning("Tracked user not found. UserId={UserId}", Id);
+
+            return user;
+        }
+
+        public async Task<IReadOnlyList<UserDto>> FindAllAsync()
         {
             _logger.LogInformation("Finding all users");
 
-            return _dbContext.Users
-                .AsNoTracking();
+            return await _dbContext.Users
+                .AsNoTracking()
+                .Select(UserDto.Projection)
+                .ToListAsync();
         }
 
-        public async Task<User?> FindByEmailAsync(string email)
+        public async Task<UserLoginDto?> FindByEmailAsync(string email)
         {
             _logger.LogInformation("Finding user by email: {Email}", email);
 
             var user = await _dbContext.Users
                 .AsNoTracking()
-                .FirstOrDefaultAsync(u => u.Email == email);
+                .Where(u => u.Email == email)
+                .Select(UserLoginDto.Projection)
+                .FirstOrDefaultAsync();
 
             if (user is null)
                 _logger.LogWarning("No user found for this email. Email={Email}", email);

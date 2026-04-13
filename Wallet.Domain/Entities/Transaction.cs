@@ -16,7 +16,7 @@ namespace Wallet.Domain.Entities
         public string? Description { get; private set; }
         public DateTime CreatedAt { get; private set; }
 
-        public Transaction() { }
+        //public Transaction() { }
 
         public Transaction(long userId, Guid walletId, TransactionType type, decimal amount,
             decimal balance, string? description = null, Guid? referenceWalletId = null)

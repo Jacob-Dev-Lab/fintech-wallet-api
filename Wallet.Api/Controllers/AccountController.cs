@@ -36,7 +36,7 @@ namespace Wallet.Api.Controllers
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, result!.Value!.UserId.ToString()),
+                new Claim(ClaimTypes.Name, result!.Value!.Id.ToString()),
                 new Claim(ClaimTypes.Email, result.Value.Email)
             };
 

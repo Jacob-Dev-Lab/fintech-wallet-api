@@ -11,7 +11,7 @@ namespace Wallet.Domain.Entities
         public bool Active { get; private set; }
         public DateTime? DeactivatedAt { get; private set; }
 
-        public User() { }
+        //public User() { }
 
         public User(string name, string email, string passwordHash)
         {

@@ -14,7 +14,9 @@ obj/
 .vscode/
 
 # Logs
+Logs/
 *.log
+*.txt
 
 # OS files
 .DS_Store

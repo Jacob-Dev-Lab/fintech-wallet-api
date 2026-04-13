@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Wallet.Application.Dtos.Responses;
 using Wallet.Application.Interfaces;
 using Wallet.Domain.Entities;
 using Wallet.Infrastructure.Data;
@@ -34,13 +35,15 @@ namespace Wallet.Infrastructure.Repository
         // ---------------------------------------------------------
         // READ-ONLY QUERIES (no tracking)
         // ---------------------------------------------------------
-        public async Task<Transaction?> FindByIdAsync(Guid transactionId)
+        public async Task<TransactionDto?> FindByIdAsync(long userId, Guid transactionId)
         {
             _logger.LogInformation("Fetching transaction with ID {TransactionId}", transactionId);
 
             var transaction = await _dbContext.Transactions
                 .AsNoTracking()
-                .FirstOrDefaultAsync(t => t.TransactionId == transactionId);
+                .Where(t => t.UserId == userId && t.TransactionId == transactionId)
+                .Select(TransactionDto.Projection)
+                .FirstOrDefaultAsync();
 
             if (transaction is null)
                 _logger.LogWarning("Transaction not found. TransactionId={TransactionId}", transactionId);
@@ -48,27 +51,26 @@ namespace Wallet.Infrastructure.Repository
             return transaction;
         }
 
-        public async Task<Transaction?> FindByWalletIdAsync(Guid walletId)
+        public async Task<IReadOnlyList<TransactionDto>> FindByWalletIdAsync(long userId, Guid walletId)
         {
             _logger.LogInformation("Fetching transaction for wallet ID {WalletId}", walletId);
 
-            var transaction = await _dbContext.Transactions
+            return await _dbContext.Transactions
                 .AsNoTracking()
-                .FirstOrDefaultAsync(t => t.WalletId == walletId);
-
-            if (transaction is null)
-                _logger.LogWarning("Transaction not found. WalletId={WalletId}", walletId);
-
-            return transaction;
+                .Where(t => t.UserId == userId && t.WalletId == walletId)
+                .Select(TransactionDto.Projection)
+                .ToListAsync();
         }
 
-        public IQueryable<Transaction> FindByUserId(long userId)
+        public async Task<IReadOnlyList<TransactionDto>> FindByUserIdAsync(long userId)
         {
             _logger.LogInformation("Fetching transactions for user ID {UserId}", userId);
 
-            return _dbContext.Transactions
+            return await _dbContext.Transactions
                 .AsNoTracking()
-                .Where(t => t.UserId == userId);
+                .Where(t => t.UserId == userId)
+                .Select(TransactionDto.Projection)
+                .ToListAsync();
         }
     }
 }

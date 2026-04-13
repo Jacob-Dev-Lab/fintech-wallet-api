@@ -18,14 +18,7 @@ namespace Wallet.Domain.Entities
         [Timestamp]
         public byte[] RowVersion { get; private set; }
 
-        private WalletAccount() { } //EF Core Constructor
-
-        public WalletAccount(Guid walletId, Currency currency, decimal balance)
-        {
-            WalletId = walletId;
-            Currency = currency;
-            Balance = balance;
-        }
+        //private WalletAccount() { } //EF Core Constructor
 
         public WalletAccount(long userId, Currency currency)
         {
