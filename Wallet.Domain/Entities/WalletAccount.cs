@@ -120,14 +120,17 @@ namespace Wallet.Domain.Entities
             if (WalletId == target.WalletId)
                 throw new DomainException("Cannot transfer to the same wallet.");
 
+            target.ChangeBalance(amount);
+            // Sender validations
             CheckIfWalletIsDeleted();
-            target.CheckIfWalletIsDeleted();
-
             CheckIfWalletIsActive();
-            target.CheckIfWalletIsActive();
+
+            // Receiver validation (only existence)
+            target.CheckIfWalletIsDeleted();
 
             CheckIfAmountIsGreaterThanZero(amount);
 
+            // Perform transfer
             ChangeBalance(-amount);
             target.ChangeBalance(amount);
         }
