@@ -23,10 +23,10 @@ namespace Wallet.Api.Controllers
             return HandleResult(await _transactionService.GetByUserIdAsync(UserId));
         }
 
-        [HttpGet("wallet/{walletId}")]
-        public async Task<IActionResult> GetByWalletId(Guid walletId)
+        [HttpGet("wallet/{id}")]
+        public async Task<IActionResult> GetByWalletId(Guid id)
         {
-            return HandleResult(await _transactionService.GetByWalletIdAsync(UserId, walletId));
+            return HandleResult(await _transactionService.GetByWalletIdAsync(UserId, id));
         }
 
         [HttpGet("{id}")]

@@ -36,7 +36,7 @@ internal class Program
         builder.Services.AddScoped<IValidator<CreateUserRequest>, CreateUserRequestValidator>();
         builder.Services.AddScoped<IValidator<UserLoginRequest>, UserLoginRequestValidator>();
         builder.Services.AddScoped<IValidator<DepositRequest>, DepositRequestValidator>();
-        builder.Services.AddScoped<IValidator<WithdrawalRequest>, WithdrawalRequestValidator>();
+        builder.Services.AddScoped<IValidator<WithdrawRequest>, WithdrawRequestValidator>();
         builder.Services.AddScoped<IValidator<TransferRequest>, TransferRequestValidator>();
 
         // Db connection service

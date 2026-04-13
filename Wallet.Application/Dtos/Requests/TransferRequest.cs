@@ -9,6 +9,7 @@ namespace Wallet.Application.Dtos.Requests
 {
     public class TransferRequest
     {
+        public Guid SendingWalletId { get; set; }
         public Guid ReceivingWalletId {  get; set; }
         public string Description { get; set; } = string.Empty;
         public decimal Amount { get; set; }
